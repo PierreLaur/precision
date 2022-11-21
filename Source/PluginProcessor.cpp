@@ -9,6 +9,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+using namespace juce ;
+
 //==============================================================================
 PrecisionAudioProcessor::PrecisionAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
@@ -21,6 +23,9 @@ PrecisionAudioProcessor::PrecisionAudioProcessor()
                      #endif
                        )
 #endif
+#ifndef JucePlugin_Name
+ #define JucePlugin_Name "precision"
+#endif
 {
 }
 
@@ -31,7 +36,8 @@ PrecisionAudioProcessor::~PrecisionAudioProcessor()
 //==============================================================================
 const juce::String PrecisionAudioProcessor::getName() const
 {
-    return JucePlugin_Name;
+
+    return JucePlugin_Name ;
 }
 
 bool PrecisionAudioProcessor::acceptsMidi() const
@@ -79,15 +85,20 @@ int PrecisionAudioProcessor::getCurrentProgram()
 
 void PrecisionAudioProcessor::setCurrentProgram (int index)
 {
+    std::cout << "Received setCurrentProgram request with index "+std::to_string(index) << std::endl ;
 }
 
 const juce::String PrecisionAudioProcessor::getProgramName (int index)
 {
+    std::cout << "Received getProgramName request with index "+std::to_string(index) << std::endl ;
     return {};
 }
 
 void PrecisionAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
+    std::cout << "Received changeProgramName request with index "+std::to_string(index) +
+    " and newName " + newName.toStdString() << std::endl ;
+
 }
 
 //==============================================================================
@@ -95,6 +106,7 @@ void PrecisionAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBl
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    
 }
 
 void PrecisionAudioProcessor::releaseResources()
@@ -131,6 +143,11 @@ bool PrecisionAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 
 void PrecisionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
+    double sampleRate = getSampleRate() ;
+    int samples = buffer.getNumSamples() ;
+
+    // AUDIO
+    {
     juce::ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
@@ -155,6 +172,16 @@ void PrecisionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
         auto* channelData = buffer.getWritePointer (channel);
 
         // ..do something to the data...
+    }
+    }
+
+    // MIDI
+    {
+        for (const auto metadata : midiMessages)
+        {
+            auto message = metadata.getMessage() ;
+            std::cout << message.getDescription() << std::endl ;
+        }
     }
 }
 

@@ -8,14 +8,49 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "MidiGrid.h"
+#include "Utils.h"
+#include <filesystem>
+#include <iostream>
+#include <fstream>
+
+using namespace juce;
 
 //==============================================================================
-PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor (PrecisionAudioProcessor& p)
-    : AudioProcessorEditor (&p), audioProcessor (p)
+PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProcessor &p)
+    : AudioProcessorEditor(&p), audioProcessor(p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    setSize (400, 300);
+  setSize(defaultWidth, defaultHeight);
+  setResizable(true, true);
+
+  setupButtons();
+
+  addAndMakeVisible(viewPort);
+  viewPort.setViewedComponent(&grid, false);
+  viewPort.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
+}
+
+void PrecisionAudioProcessorEditor::setupButtons()
+{
+  horizontalZoomIn.setColour(juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
+  horizontalZoomOut.setColour(juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
+  verticalZoomIn.setColour(juce::TextButton::buttonColourId, juce::Colours::greenyellow);
+  verticalZoomOut.setColour(juce::TextButton::buttonColourId, juce::Colours::greenyellow);
+
+  horizontalZoomIn.setButtonText("+");
+  horizontalZoomOut.setButtonText("-");
+  verticalZoomIn.setButtonText("+");
+  verticalZoomOut.setButtonText("-");
+
+  horizontalZoomIn.addListener(this);
+  horizontalZoomOut.addListener(this);
+  verticalZoomIn.addListener(this);
+  verticalZoomOut.addListener(this);
+
+  addAndMakeVisible(horizontalZoomIn);
+  addAndMakeVisible(horizontalZoomOut);
+  addAndMakeVisible(verticalZoomIn);
+  addAndMakeVisible(verticalZoomOut);
 }
 
 PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
@@ -23,18 +58,67 @@ PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
 }
 
 //==============================================================================
-void PrecisionAudioProcessorEditor::paint (juce::Graphics& g)
+void PrecisionAudioProcessorEditor::paint(Graphics &g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 
-    g.setColour (juce::Colours::white);
-    g.setFont (15.0f);
-    g.drawFittedText ("Hello World!", getLocalBounds(), juce::Justification::centred, 1);
+  g.fillAll(Colours::maroon);
+  // Reading a MIDI clip
+  String dataPath = "C:\\Users\\pierr\\precision_project\\precision\\data";
+  MidiFile midiFile = readMidiFile(dataPath + "\\simple.mid");
+  grid.storeMidiNotes(midiFile);
+}
+
+void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
+{
+  if (button == &horizontalZoomIn)
+    widthMultiplier += 0.1f;
+  else if (button == &horizontalZoomOut)
+    widthMultiplier -= 0.1f;
+  else if (button == &verticalZoomIn)
+    heightMultiplier += 0.1f;
+  else if (button == &verticalZoomOut)
+    heightMultiplier -= 0.1f;
+  scaler = scaler.scale(widthMultiplier, heightMultiplier);
+  grid.setTransform(scaler);
+
+  // TODO : limit zoom so that the view stays the same size
+}
+
+void PrecisionAudioProcessorEditor::automaticZoom()
+{
+  // TODO
 }
 
 void PrecisionAudioProcessorEditor::resized()
 {
-    // This is generally where you'll want to lay out the positions of any
-    // subcomponents in your editor..
+  auto area = getLocalBounds();
+
+  viewPort.setBounds(
+      20, 20,
+      area.getWidth() - 150,
+      200);
+
+  horizontalZoomIn.setBounds(
+      viewPort.getRight() + 50,
+      viewPort.getY() + 20,
+      30,
+      30);
+
+  horizontalZoomOut.setBounds(
+      viewPort.getRight() + 90,
+      viewPort.getY() + 20,
+      30,
+      30);
+
+  verticalZoomIn.setBounds(
+      viewPort.getRight() + 50,
+      viewPort.getY() + 60,
+      30,
+      30);
+
+  verticalZoomOut.setBounds(
+      viewPort.getRight() + 90,
+      viewPort.getY() + 60,
+      30,
+      30);
 }

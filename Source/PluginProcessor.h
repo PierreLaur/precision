@@ -10,6 +10,8 @@
 
 #include <JuceHeader.h>
 
+using namespace juce ;
+
 //==============================================================================
 /**
 */
@@ -19,10 +21,12 @@ class PrecisionAudioProcessor  : public juce::AudioProcessor
                             #endif
 {
 public:
+    int velocity ;
+
     //==============================================================================
     PrecisionAudioProcessor();
     ~PrecisionAudioProcessor() override;
-
+    
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
     void releaseResources() override;
