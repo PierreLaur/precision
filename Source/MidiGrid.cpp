@@ -73,7 +73,6 @@ void MidiGrid::createMidiNote(Point<int> point)
 {
   float start = point.getX() / BEAT_LENGTH_TIMESTEPS;
   MidiNote *myNote = new MidiNote(start, 1.0f, currentNoteID, *this);
-  std::cout << "creating ID " << currentNoteID << std::endl;
 
   midiNotes.push_back(myNote);
 
@@ -85,11 +84,10 @@ void MidiGrid::createMidiNote(Point<int> point)
   currentNoteID += 1;
 }
 
-void MidiGrid::deleteMidiNote(int noteID)
+void MidiGrid::deleteMidiNote(String noteID)
 {
   // TODO : something cleaner
-  removeChildComponent(getIndexOfChildComponent(findChildWithID(std::to_string(noteID))));
-  std::cout << "deleting ID " << 0 << std::endl;
+  removeChildComponent(getIndexOfChildComponent(findChildWithID(noteID)));
 }
 
 void MidiGrid::mouseDoubleClick(const MouseEvent &e)

@@ -28,8 +28,6 @@ public:
   float noteStart ;
   float noteLength ;
 
-  int noteID ;
-
   void mouseDrag(const MouseEvent &) override;
   void mouseUp(const MouseEvent &) override;
   void mouseDoubleClick(const MouseEvent &) override;

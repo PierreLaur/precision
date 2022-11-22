@@ -23,7 +23,6 @@ class MidiGrid : public Component
 {
 public:
   MidiGrid() ;
-  // MidiGrid &MidiGrid::operator=(const MidiGrid &);
 
   ~MidiGrid() override;
 
@@ -35,7 +34,7 @@ public:
 
   void MidiGrid::mouseDoubleClick(const MouseEvent &) override ;
   void MidiGrid::createMidiNote(Point<int> point) ;
-  void MidiGrid::deleteMidiNote(int noteID) ;
+  void MidiGrid::deleteMidiNote(String noteID) ;
 
   void paint(juce::Graphics &) override;
   void resized() override;

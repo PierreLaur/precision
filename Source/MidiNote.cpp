@@ -17,7 +17,7 @@
 using namespace juce;
 
 MidiNote::MidiNote(float start, float length, int noteID, MidiGrid & grid) : 
-        ResizableWindow("noName", Colours::red, false), noteID{noteID}, noteStart{start}, noteLength{length}, parentGrid{grid}
+        ResizableWindow("noName", Colours::red, false), noteStart{start}, noteLength{length}, parentGrid{grid}
 {
     constrainer = &noteConstrainer;
     setComponentID(std::to_string(noteID)) ;
@@ -52,7 +52,7 @@ void MidiNote::mouseUp(const MouseEvent &e)
 void MidiNote::mouseDoubleClick(const MouseEvent &e)
 {
     ResizableWindow::mouseDoubleClick(e);
-    parentGrid.deleteMidiNote(noteID);
+    parentGrid.deleteMidiNote(getComponentID());
 };
 
 void MidiNote::quantize()
