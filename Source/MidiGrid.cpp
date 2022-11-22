@@ -7,9 +7,11 @@
 
   ==============================================================================
 */
+#pragma once
 
 #include <JuceHeader.h>
 #include "MidiGrid.h"
+#include "MidiNote.h"
 #include "Utils.h"
 #include <stack>
 
@@ -19,8 +21,6 @@ using namespace juce;
 MidiGrid::MidiGrid()
 {
   setLookAndFeel(&lf);
-  addAndMakeVisible(myNote);
-  setSize(1100, NOTE_HEIGHT * 128);
 }
 
 MidiGrid::~MidiGrid()
@@ -30,8 +30,9 @@ MidiGrid::~MidiGrid()
 void MidiGrid::processMidiMessage(MidiMessage * message) {
   if (message->isNoteOnOrOff()) {
     // std::cout << message->getDescription() << std::endl;
-  } else if (message->isTempoMetaEvent()) {
 
+  } else if (message->isTempoMetaEvent()) {
+    // TODO
   }
 }
 
@@ -55,47 +56,91 @@ void MidiGrid::storeMidiNotes(MidiFile file)
   };
   // std::cout << "\n" << std::endl ;
 }
-  
 
-  void MidiGrid::paint(Graphics & g)
-  {
-    g.fillAll(Colours::lightgrey); // clear the background
-    String num = "0" ;
-    // drawing the horizontal grid lines
-    for (int i = 0; i < 128; i++)
-    {
-      Rectangle rect = Rectangle(Point<float>(static_cast<float>(getX()), static_cast<float>(i * NOTE_HEIGHT)),
-                              Point<float>(static_cast<float>(getRight())*10.0f, (static_cast<float>(i)+1.0f) * static_cast<float>(NOTE_HEIGHT)));
-      num = String(127-i) ;
+void MidiGrid::createMidiNote(Point<int> point) {
 
+  float start = point.getX()/BEAT_LENGTH_TIMESTEPS ;
+  MidiNote * myNote = new MidiNote(start,1.0f, currentNoteID, this);
+  currentNoteID += 1 ;
+  // midiNotes.push_back(myNote) ;
+  myNote->setBounds(static_cast<int>(myNote->noteStart) * BEAT_LENGTH_TIMESTEPS,
+                      50,
+                      static_cast<int>(myNote->noteLength) * BEAT_LENGTH_TIMESTEPS,
+                      NOTE_HEIGHT);
+  addAndMakeVisible(*myNote);
+}
 
-      if (i%12 == 1 || i%12 == 4 || i%12 == 6 || i%12 == 9 || i%12 == 11) {
-        g.setColour(Colours::dimgrey);
-        g.fillRect(rect);
+void MidiGrid::deleteMidiNote(int noteID) {
+  std::cout << "deleting" << std::endl ;
+  removeAllChildren();
+  for (midiNotesIterator = midiNotes.begin();
+      midiNotesIterator != midiNotes.end();
+      midiNotesIterator++) {
+        if ((*midiNotesIterator)->noteID == noteID) {
+          std::cout << "deleting" << std::endl ;
+          midiNotes.erase(midiNotesIterator) ;
+        }
       }
-      g.setColour(Colours::black);
-      g.drawText(num, rect, Justification::bottomLeft,true) ;
-    }
+}
 
-    // vertical
-    for (int i = 0; i < getWidth() ; i+=BEAT_LENGTH_TIMESTEPS)
-    {
-      g.setColour(Colours::darkgrey);
-      // draw longer than it should be (otherwise the right part isnt drawn for some reason)
-      Line<float> line = Line(Point<float>(static_cast<float>(i), static_cast<float>(getY())),
-                              Point<float>(static_cast<float>(i), static_cast<float>(getBottom()*10))); 
-      g.drawLine(line, 1.0f);
-    }
+void MidiGrid::mouseDoubleClick(const MouseEvent &e) {
+  Component::mouseDoubleClick(e);
+  createMidiNote(e.getPosition()) ;
+}
 
-    // outline
-    g.setColour(Colours::black);
-    g.drawRect(getLocalBounds(), 2);
-  }
 
-  void MidiGrid::resized()
+void MidiGrid::paint(Graphics & g)
+{
+  g.fillAll(Colours::lightgrey); // clear the background
+  String num = "0" ;
+  // drawing the horizontal grid lines
+  for (int i = 0; i < 128; i++)
   {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
+    Rectangle rect = Rectangle(Point<float>(static_cast<float>(getX()), static_cast<float>(i * NOTE_HEIGHT)),
+                            Point<float>(static_cast<float>(getRight())*10.0f, (static_cast<float>(i)+1.0f) * static_cast<float>(NOTE_HEIGHT)));
+    num = String(127-i) ;
 
-    auto area = getLocalBounds();
+
+    if (i%12 == 1 || i%12 == 4 || i%12 == 6 || i%12 == 9 || i%12 == 11) {
+      g.setColour(Colours::dimgrey);
+      g.fillRect(rect);
+    }
+    g.setColour(Colours::black);
+    g.drawText(num, rect, Justification::bottomLeft,true) ;
   }
+
+  // vertical
+  for (int i = 0; i < getWidth() ; i+=BEAT_LENGTH_TIMESTEPS)
+  {
+    g.setColour(Colours::darkgrey);
+    // draw longer than it should be (otherwise the right part isnt drawn for some reason)
+    Line<float> line = Line(Point<float>(static_cast<float>(i), static_cast<float>(getY())),
+                            Point<float>(static_cast<float>(i), static_cast<float>(getBottom()*10))); 
+    g.drawLine(line, 1.0f);
+  }
+
+  // outline
+  g.setColour(Colours::black);
+  g.drawRect(getLocalBounds(), 2);
+
+  // for (MidiNote * note : midiNotes) {
+  //   std::cout << "calling repaint" << std::endl ;
+  //   note->paint(g) ;
+  // }
+}
+
+void MidiGrid::resized()
+{
+  // This method is where you should set the bounds of any child
+  // components that your component contains..
+
+  auto area = getLocalBounds();
+}
+
+
+
+
+
+
+
+

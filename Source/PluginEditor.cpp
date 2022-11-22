@@ -6,6 +6,8 @@
   ==============================================================================
 */
 
+#pragma once
+
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "MidiGrid.h"
@@ -26,6 +28,7 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   setupButtons();
 
   addAndMakeVisible(viewPort);
+  grid.setSize(1200, NOTE_HEIGHT * 128);
   viewPort.setViewedComponent(&grid, false);
   viewPort.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
 }
