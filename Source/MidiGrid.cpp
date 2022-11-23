@@ -23,15 +23,6 @@ MidiGrid::MidiGrid()
   setLookAndFeel(&lf);
 }
 
-// MidiGrid &MidiGrid::operator=(const MidiGrid & grid) {
-//   tempo = grid.tempo ; // TODO : handle tempo changes
-//   quantization = grid.quantization ; // 1 for 1/4 notes, 2 for
-//   currentNoteID = grid.currentNoteID ;
-//   midiNotes = grid.midiNotes ;
-//   midiNotesIterator = grid.midiNotesIterator ;
-//   return *this ;
-// }
-
 MidiGrid::~MidiGrid()
 {
 }
@@ -71,13 +62,14 @@ void MidiGrid::storeMidiNotes(MidiFile file)
 
 void MidiGrid::createMidiNote(Point<int> point)
 {
-  float start = point.getX() / BEAT_LENGTH_TIMESTEPS;
-  MidiNote *myNote = new MidiNote(start, 1.0f, currentNoteID, *this);
+  float start = static_cast<float>(point.getX() / BEAT_LENGTH_TIMESTEPS);
+  int noteY = point.getY() / NOTE_HEIGHT ;
+  MidiNote *myNote = new MidiNote(127-noteY, start, quantizationInBeats, currentNoteID, *this);
 
   midiNotes.push_back(myNote);
 
   myNote->setBounds(static_cast<int>(myNote->noteStart) * BEAT_LENGTH_TIMESTEPS,
-                    50,
+                    noteY * NOTE_HEIGHT,
                     static_cast<int>(myNote->noteLength) * BEAT_LENGTH_TIMESTEPS,
                     NOTE_HEIGHT);
   addAndMakeVisible(*myNote, currentNoteID);
@@ -129,11 +121,17 @@ void MidiGrid::paint(Graphics &g)
   // outline
   g.setColour(Colours::black);
   g.drawRect(getLocalBounds(), 2);
+}
 
-  // for (MidiNote * note : midiNotes) {
-  //   std::cout << "calling repaint" << std::endl ;
-  //   note->paint(g) ;
-  // }
+void MidiGrid::quantize() {
+  for (auto child : getChildren()) {
+    float currentStart = static_cast<float>(child->getX())/BEAT_LENGTH_TIMESTEPS ;
+    Rectangle<int> newBounds = child->getBounds() ;
+    newBounds.setX(
+      static_cast<int>(std::round(currentStart/quantizationInBeats)*quantizationInBeats*BEAT_LENGTH_TIMESTEPS)
+    ) ;
+    child->setBounds(newBounds) ;
+  }
 }
 
 void MidiGrid::resized()

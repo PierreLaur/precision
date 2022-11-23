@@ -20,23 +20,21 @@ class MidiGrid ;
 class MidiNote : public ResizableWindow
 {
 public:
-  MidiNote::MidiNote() ;
-  MidiNote(float noteStart, float noteLength, int noteID, MidiGrid & grid) ;
+  MidiNote(int pitch, float noteStart, float noteLength, int noteID, MidiGrid & grid) ;
   ~MidiNote();
-  ComponentBoundsConstrainer noteConstrainer;
+  void paint(Graphics &g) override;
 
+  int notePitch ;
   float noteStart ;
   float noteLength ;
 
+  void updateNote();
   void mouseDrag(const MouseEvent &) override;
   void mouseUp(const MouseEvent &) override;
   void mouseDoubleClick(const MouseEvent &) override;
 
-  void quantize();
-  void setResizable(const bool shouldBeResizable, const bool useBottomRightCornerResizer);
-  void paint(Graphics &g) override;
-
 private:
+  ComponentBoundsConstrainer noteConstrainer;
   MidiGrid & parentGrid ;
   PrecisionLookAndFeel lf;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MidiNote)

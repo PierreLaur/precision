@@ -16,8 +16,8 @@
 
 using namespace juce;
 
-MidiNote::MidiNote(float start, float length, int noteID, MidiGrid & grid) : 
-        ResizableWindow("noName", Colours::red, false), noteStart{start}, noteLength{length}, parentGrid{grid}
+MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid & grid) : 
+        ResizableWindow("noName", Colours::red, false), notePitch{pitch}, noteStart{start}, noteLength{length}, parentGrid{grid}
 {
     constrainer = &noteConstrainer;
     setComponentID(std::to_string(noteID)) ;
@@ -33,6 +33,21 @@ MidiNote::MidiNote(float start, float length, int noteID, MidiGrid & grid) :
 
 MidiNote::~MidiNote()
 {
+}
+
+void MidiNote::paint(Graphics &g)
+{
+    ResizableWindow::paint(g);
+    g.setColour(juce::Colours::black);
+    g.drawRect(getLocalBounds(), 1); // draw an outline around the component
+    updateNote() ;
+}
+
+
+void MidiNote::updateNote() {
+    noteLength = static_cast<float>(getWidth()) / BEAT_LENGTH_TIMESTEPS ;
+    noteStart = static_cast<float>(getX()) / BEAT_LENGTH_TIMESTEPS ;
+    notePitch = getY() / NOTE_HEIGHT ;
 }
 
 void MidiNote::mouseDrag(const MouseEvent &e)
@@ -54,56 +69,3 @@ void MidiNote::mouseDoubleClick(const MouseEvent &e)
     ResizableWindow::mouseDoubleClick(e);
     parentGrid.deleteMidiNote(getComponentID());
 };
-
-void MidiNote::quantize()
-{
-}
-
-void MidiNote::setResizable(const bool shouldBeResizable,
-                            const bool useBottomRightCornerResizer)
-
-{
-    if (shouldBeResizable)
-    {
-        if (useBottomRightCornerResizer)
-        {
-            resizableBorder.reset();
-
-            if (resizableCorner == nullptr)
-            {
-                resizableCorner.reset(new ResizableCornerComponent(this, &noteConstrainer));
-                Component::addChildComponent(resizableCorner.get());
-                resizableCorner->setAlwaysOnTop(true);
-                resizableCorner->setColour(this->backgroundColourId, Colours::red);
-            }
-        }
-        else
-        {
-            resizableCorner.reset();
-
-            if (resizableBorder == nullptr)
-            {
-                resizableBorder.reset(new ResizableBorderComponent(this, constrainer));
-                Component::addChildComponent(resizableBorder.get());
-            }
-        }
-    }
-    else
-    {
-        resizableCorner.reset();
-        resizableBorder.reset();
-    }
-
-    if (isUsingNativeTitleBar())
-        recreateDesktopWindow();
-
-    childBoundsChanged(contentComponent);
-    resized();
-}
-
-void MidiNote::paint(Graphics &g)
-{
-    ResizableWindow::paint(g);
-    g.setColour(juce::Colours::black);
-    g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-}

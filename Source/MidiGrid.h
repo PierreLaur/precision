@@ -23,10 +23,7 @@ class MidiGrid : public Component
 {
 public:
   MidiGrid() ;
-
   ~MidiGrid() override;
-
-
 
   void MidiGrid::printMidiMessageSequence(MidiMessageSequence track);
   void MidiGrid::storeMidiNotes(MidiFile file);
@@ -36,11 +33,13 @@ public:
   void MidiGrid::createMidiNote(Point<int> point) ;
   void MidiGrid::deleteMidiNote(String noteID) ;
 
+  void MidiGrid::quantize() ;
+
   void paint(juce::Graphics &) override;
   void resized() override;
 
   float tempo = 120.0f ; // TODO : handle tempo changes
-  int quantization = 1 ; // 1 for 1/4 notes, 2 for 
+  float quantizationInBeats = 1.0 ;
   int currentNoteID = 0 ;
   std::list<MidiNote*> midiNotes ;
   PrecisionLookAndFeel lf;

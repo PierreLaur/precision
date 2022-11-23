@@ -39,21 +39,28 @@ void PrecisionAudioProcessorEditor::setupButtons()
   horizontalZoomOut.setColour(juce::TextButton::buttonColourId, juce::Colours::cornflowerblue);
   verticalZoomIn.setColour(juce::TextButton::buttonColourId, juce::Colours::greenyellow);
   verticalZoomOut.setColour(juce::TextButton::buttonColourId, juce::Colours::greenyellow);
+  quantizeButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+
 
   horizontalZoomIn.setButtonText("+");
   horizontalZoomOut.setButtonText("-");
   verticalZoomIn.setButtonText("+");
   verticalZoomOut.setButtonText("-");
+  quantizeButton.setButtonText("Q");
+
 
   horizontalZoomIn.addListener(this);
   horizontalZoomOut.addListener(this);
   verticalZoomIn.addListener(this);
   verticalZoomOut.addListener(this);
+  quantizeButton.addListener(this);
+
 
   addAndMakeVisible(horizontalZoomIn);
   addAndMakeVisible(horizontalZoomOut);
   addAndMakeVisible(verticalZoomIn);
   addAndMakeVisible(verticalZoomOut);
+  addAndMakeVisible(quantizeButton);
 }
 
 PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
@@ -81,6 +88,8 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
     heightMultiplier += 0.1f;
   else if (button == &verticalZoomOut)
     heightMultiplier -= 0.1f;
+  else if (button == &quantizeButton)
+    grid.quantize();
   scaler = scaler.scale(widthMultiplier, heightMultiplier);
   grid.setTransform(scaler);
 
@@ -122,6 +131,12 @@ void PrecisionAudioProcessorEditor::resized()
   verticalZoomOut.setBounds(
       viewPort.getRight() + 90,
       viewPort.getY() + 60,
+      30,
+      30);
+
+  quantizeButton.setBounds(
+      viewPort.getRight() + 50,
+      viewPort.getY() + 120,
       30,
       30);
 }

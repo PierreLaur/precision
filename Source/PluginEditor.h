@@ -42,6 +42,8 @@ private:
   juce::TextButton horizontalZoomOut;
   juce::TextButton verticalZoomIn;
   juce::TextButton verticalZoomOut;
+  juce::TextButton quantizeButton;
+
 
   int defaultWidth = 1200;
   int defaultHeight = 700;
