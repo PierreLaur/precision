@@ -28,8 +28,8 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   setupButtons();
 
   addAndMakeVisible(viewPort);
-  grid.setSize(1200, NOTE_HEIGHT * 128);
   viewPort.setViewedComponent(&grid, false);
+  // viewPort.setScrollBarsShown() // TODO
   viewPort.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
 }
 
@@ -42,10 +42,10 @@ void PrecisionAudioProcessorEditor::setupButtons()
   quantizeButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
 
 
-  horizontalZoomIn.setButtonText("+");
-  horizontalZoomOut.setButtonText("-");
-  verticalZoomIn.setButtonText("+");
-  verticalZoomOut.setButtonText("-");
+  horizontalZoomIn.setButtonText("H+");
+  horizontalZoomOut.setButtonText("H-");
+  verticalZoomIn.setButtonText("V+");
+  verticalZoomOut.setButtonText("V-");
   quantizeButton.setButtonText("Q");
 
 
@@ -73,21 +73,20 @@ void PrecisionAudioProcessorEditor::paint(Graphics &g)
 
   g.fillAll(Colours::maroon);
   // Reading a MIDI clip
-  String dataPath = "C:\\Users\\pierr\\precision_project\\precision\\data";
-  MidiFile midiFile = readMidiFile(dataPath + "\\simple.mid");
-  grid.storeMidiNotes(midiFile);
+
 }
 
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 {
+
   if (button == &horizontalZoomIn)
     widthMultiplier += 0.1f;
   else if (button == &horizontalZoomOut)
-    widthMultiplier -= 0.1f;
+    widthMultiplier = std::max(widthMultiplier - 0.1f, minWidthMultiplier) ;
   else if (button == &verticalZoomIn)
-    heightMultiplier += 0.1f;
+    heightMultiplier += 0.1f ;
   else if (button == &verticalZoomOut)
-    heightMultiplier -= 0.1f;
+    heightMultiplier = std::max(heightMultiplier - 0.1f, minHeightMultiplier) ;
   else if (button == &quantizeButton)
     grid.quantize();
   scaler = scaler.scale(widthMultiplier, heightMultiplier);
@@ -105,33 +104,38 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
+  grid.setSize(1200, NOTE_HEIGHT * 128);
   viewPort.setBounds(
       20, 20,
       area.getWidth() - 150,
-      200);
+      300);
+
+    // TODO : choose scrollbars on or off
+  minHeightMultiplier = static_cast<float>(viewPort.getHeight()-viewPort.getHorizontalScrollBar().getHeight()) / grid.getHeight() ;
+  minWidthMultiplier = static_cast<float>(viewPort.getWidth()-viewPort.getVerticalScrollBar().getWidth()) / grid.getWidth() ;
 
   horizontalZoomIn.setBounds(
       viewPort.getRight() + 50,
       viewPort.getY() + 20,
-      30,
+      40,
       30);
 
   horizontalZoomOut.setBounds(
-      viewPort.getRight() + 90,
+      viewPort.getRight() + 100,
       viewPort.getY() + 20,
-      30,
+      40,
       30);
 
   verticalZoomIn.setBounds(
       viewPort.getRight() + 50,
       viewPort.getY() + 60,
-      30,
+      40,
       30);
 
   verticalZoomOut.setBounds(
-      viewPort.getRight() + 90,
+      viewPort.getRight() + 100,
       viewPort.getY() + 60,
-      30,
+      40,
       30);
 
   quantizeButton.setBounds(

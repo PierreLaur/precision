@@ -31,12 +31,13 @@ public:
   void buttonClicked(Button *button) override;
   void setupButtons();
 
+  MidiGrid grid;
+  Viewport viewPort;
+
 private:
   // This reference is provided as a quick way for your editor to
   // access the processor object that created it.
   PrecisionAudioProcessor &audioProcessor;
-  MidiGrid grid;
-  Viewport viewPort;
 
   juce::TextButton horizontalZoomIn;
   juce::TextButton horizontalZoomOut;
@@ -49,6 +50,9 @@ private:
   int defaultHeight = 700;
   float widthMultiplier = 1.0f;
   float heightMultiplier = 1.0f;
+  float minWidthMultiplier ;
+  float minHeightMultiplier ;
+
   AffineTransform scaler = AffineTransform::AffineTransform();
 
   int horizontalMargin = 50;

@@ -179,8 +179,11 @@ void PrecisionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
     {
         for (const auto metadata : midiMessages)
         {
+            int timestep = metadata.samplePosition ;
             auto message = metadata.getMessage() ;
-            std::cout << message.getDescription() << std::endl ;
+            std::cout << message.getDescription() << "at timestep " << timestep << std::endl ;
+            editor->grid.processMidiMessage(&message, timestep) ;
+            
         }
     }
 }
@@ -193,7 +196,8 @@ bool PrecisionAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* PrecisionAudioProcessor::createEditor()
 {
-    return new PrecisionAudioProcessorEditor (*this);
+    editor = new PrecisionAudioProcessorEditor (*this) ;
+    return editor;
 }
 
 //==============================================================================
