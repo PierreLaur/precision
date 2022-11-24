@@ -48,7 +48,7 @@ private:
   juce::TextButton quantizeButton;
 
 
-  int defaultWidth = 1200;
+  int defaultWidth = 1250;
   int defaultHeight = 700;
   float widthMultiplier = 1.0f;
   float heightMultiplier = 1.0f;

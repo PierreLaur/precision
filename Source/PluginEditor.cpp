@@ -72,8 +72,7 @@ PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
 void PrecisionAudioProcessorEditor::paint(Graphics &g)
 {
 
-  g.fillAll(Colours::maroon);
-  // Reading a MIDI clip
+  g.fillAll(Colours::darkred);
 
 }
 
@@ -105,10 +104,10 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
-  gridDisplayer.setSize(1200, NOTE_HEIGHT * 128);
+  gridDisplayer.setSize(BEAT_LENGTH_TIMESTEPS*16+30, NOTE_HEIGHT * 128);
   viewPort.setBounds(
       20, 20,
-      area.getWidth() - 150,
+      area.getWidth() - 200,
       300);
 
     // TODO : choose scrollbars on or off

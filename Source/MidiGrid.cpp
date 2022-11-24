@@ -31,10 +31,10 @@ void MidiGrid::paint(Graphics &g)
 {
   g.fillAll(Colours::lightgrey); // clear the background
   String num = "0";
-  // drawing the horizontal grid lines
+  // horizontal
   for (int i = 0; i < 128; i++)
   {
-    Rectangle rect = Rectangle(Point<float>(static_cast<float>(getX()), static_cast<float>(i * NOTE_HEIGHT)),
+    Rectangle rect = Rectangle(Point<float>(0.0f, static_cast<float>(i * NOTE_HEIGHT)),
                                Point<float>(static_cast<float>(getRight()) * 10.0f, (static_cast<float>(i) + 1.0f) * static_cast<float>(NOTE_HEIGHT)));
     num = String(127 - i);
 
@@ -163,9 +163,13 @@ void MidiGrid::quantize()
   for (auto child : getChildren())
   {
     float currentStart = static_cast<float>(child->getX()) / BEAT_LENGTH_TIMESTEPS;
+    float currentLength = static_cast<float>(child->getWidth()) / BEAT_LENGTH_TIMESTEPS;
+    
     Rectangle<int> newBounds = child->getBounds();
     newBounds.setX(
         static_cast<int>(std::round(currentStart / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_TIMESTEPS));
+    newBounds.setWidth(
+        static_cast<int>(std::round(currentLength / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_TIMESTEPS));
     child->setBounds(newBounds);
   }
 }
