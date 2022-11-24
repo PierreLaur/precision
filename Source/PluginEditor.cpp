@@ -28,7 +28,8 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   setupButtons();
 
   addAndMakeVisible(viewPort);
-  viewPort.setViewedComponent(&grid, false);
+  viewPort.setViewedComponent(&gridDisplayer, false);
+  grid = &gridDisplayer.grid ;
   // viewPort.setScrollBarsShown() // TODO
   viewPort.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
 }
@@ -88,9 +89,9 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
   else if (button == &verticalZoomOut)
     heightMultiplier = std::max(heightMultiplier - 0.1f, minHeightMultiplier) ;
   else if (button == &quantizeButton)
-    grid.quantize();
+    grid->quantize();
   scaler = scaler.scale(widthMultiplier, heightMultiplier);
-  grid.setTransform(scaler);
+  gridDisplayer.setTransform(scaler);
 
   // TODO : limit zoom so that the view stays the same size
 }
@@ -104,15 +105,15 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
-  grid.setSize(1200, NOTE_HEIGHT * 128);
+  gridDisplayer.setSize(1200, NOTE_HEIGHT * 128);
   viewPort.setBounds(
       20, 20,
       area.getWidth() - 150,
       300);
 
     // TODO : choose scrollbars on or off
-  minHeightMultiplier = static_cast<float>(viewPort.getHeight()-viewPort.getHorizontalScrollBar().getHeight()) / grid.getHeight() ;
-  minWidthMultiplier = static_cast<float>(viewPort.getWidth()-viewPort.getVerticalScrollBar().getWidth()) / grid.getWidth() ;
+  minHeightMultiplier = static_cast<float>(viewPort.getHeight()-viewPort.getHorizontalScrollBar().getHeight()) / gridDisplayer.getHeight() ;
+  minWidthMultiplier = static_cast<float>(viewPort.getWidth()-viewPort.getVerticalScrollBar().getWidth()) / gridDisplayer.getWidth() ;
 
   horizontalZoomIn.setBounds(
       viewPort.getRight() + 50,

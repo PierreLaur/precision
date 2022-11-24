@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "MidiGrid.h"
+#include "GridDisplayer.h"
 
 using namespace juce;
 
@@ -31,7 +32,8 @@ public:
   void buttonClicked(Button *button) override;
   void setupButtons();
 
-  MidiGrid grid;
+  GridDisplayer gridDisplayer;
+  MidiGrid * grid;
   Viewport viewPort;
 
 private:
