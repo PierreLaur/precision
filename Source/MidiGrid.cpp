@@ -46,7 +46,7 @@ void MidiGrid::paint(Graphics &g)
   }
 
   // vertical
-  for (int i = 0; i < getWidth(); i += BEAT_LENGTH_TIMESTEPS)
+  for (int i = 0; i < getWidth(); i += static_cast<int>(quantizationInBeats*BEAT_LENGTH_TIMESTEPS))
   {
     g.setColour(Colours::darkgrey);
     // draw longer than it should be (otherwise the right part isnt drawn for some reason)
@@ -55,9 +55,17 @@ void MidiGrid::paint(Graphics &g)
     g.drawLine(line, 1.0f);
   }
 
-  // outline
-  g.setColour(Colours::black);
-  g.drawRect(getLocalBounds(), 2);
+  g.setColour(Colours::black) ;
+  auto bounds = getLocalBounds() ;
+  auto topleft = Point(static_cast<float>(bounds.getX()), static_cast<float>(bounds.getY())) ;
+  auto topright = Point(static_cast<float>(bounds.getRight()), static_cast<float>(bounds.getY())) ;
+  auto bottomleft = Point(static_cast<float>(bounds.getX()), static_cast<float>(bounds.getBottom())) ;
+  auto bottomright = Point(static_cast<float>(bounds.getRight()), static_cast<float>(bounds.getBottom())) ;
+
+  g.drawLine(Line(topleft, topright), 3.0f);
+  g.drawLine(Line(topright, bottomright), 3.0f);
+  g.drawLine(Line(bottomright, bottomleft), 3.0f);
+
 }
 
 void MidiGrid::resized()

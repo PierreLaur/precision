@@ -5,9 +5,13 @@
               pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn">
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
-      <FILE id="WaTsbg" name="GridDisplayer.cpp" compile="1" resource="0"
-            file="Source/GridDisplayer.cpp"/>
-      <FILE id="nwX0uA" name="GridDisplayer.h" compile="0" resource="0" file="Source/GridDisplayer.h"/>
+      <FILE id="f1pCaq" name="LinkableViewport.cpp" compile="1" resource="0"
+            file="Source/LinkableViewport.cpp"/>
+      <FILE id="Vl8Kcu" name="LinkableViewport.h" compile="0" resource="0"
+            file="Source/LinkableViewport.h"/>
+      <FILE id="WaTsbg" name="VerticalPiano.cpp" compile="1" resource="0"
+            file="Source/VerticalPiano.cpp"/>
+      <FILE id="nwX0uA" name="VerticalPiano.h" compile="0" resource="0" file="Source/VerticalPiano.h"/>
       <FILE id="vzTUGB" name="MidiNote.cpp" compile="1" resource="0" file="Source/MidiNote.cpp"/>
       <FILE id="hOup0n" name="MidiNote.h" compile="0" resource="0" file="Source/MidiNote.h"/>
       <FILE id="oc9KqD" name="MidiGrid.cpp" compile="1" resource="0" file="Source/MidiGrid.cpp"/>

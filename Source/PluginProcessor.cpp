@@ -182,7 +182,7 @@ void PrecisionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, ju
             int timestep = metadata.samplePosition ;
             auto message = metadata.getMessage() ;
             std::cout << message.getDescription() << "at timestep " << timestep << std::endl ;
-            editor->grid->processMidiMessage(&message, timestep) ;
+            editor->grid.processMidiMessage(&message, timestep) ;
             
         }
     }

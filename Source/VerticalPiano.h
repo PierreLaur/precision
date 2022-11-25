@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    GridDisplayer.h
+    VerticalPiano.h
     Created: 24 Nov 2022 6:40:05pm
     Author:  pierr
 
@@ -16,17 +16,15 @@
 //==============================================================================
 /*
 */
-class GridDisplayer  : public juce::Component
+class VerticalPiano  : public juce::Component
 {
 public:
-    GridDisplayer();
-    ~GridDisplayer() override;
+    VerticalPiano();
+    ~VerticalPiano() override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
 
-    MidiGrid grid ;
-
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (GridDisplayer)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VerticalPiano)
 };

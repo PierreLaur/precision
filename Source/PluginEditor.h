@@ -11,7 +11,8 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "MidiGrid.h"
-#include "GridDisplayer.h"
+#include "VerticalPiano.h"
+#include "LinkableViewport.h"
 
 using namespace juce;
 
@@ -32,9 +33,12 @@ public:
   void buttonClicked(Button *button) override;
   void setupButtons();
 
-  GridDisplayer gridDisplayer;
-  MidiGrid * grid;
-  Viewport viewPort;
+  VerticalPiano verticalPiano;
+  MidiGrid grid;
+
+  LinkableViewport viewPort1;
+  LinkableViewport viewPort2;
+
 
 private:
   // This reference is provided as a quick way for your editor to
