@@ -14,7 +14,7 @@
 
 using namespace juce;
 
-const int NOTE_HEIGHT = 16;
+const int NOTE_HEIGHT = 16 ;
 const int NOTE_MIN_WIDTH = 10;
 const int BEAT_LENGTH_TIMESTEPS = 100;
 

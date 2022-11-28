@@ -29,7 +29,7 @@ void VerticalPiano::paint(juce::Graphics &g)
   for (int i = 0; i < 128; i++)
   {
     Rectangle rect = Rectangle(Point<float>(0.0f, static_cast<float>(i * NOTE_HEIGHT)),
-                               Point<float>(getWidth(), (static_cast<float>(i) + 1.0f) * static_cast<float>(NOTE_HEIGHT)));
+                               Point<float>(static_cast<float>(getWidth()), (static_cast<float>(i) + 1.0f) * static_cast<float>(NOTE_HEIGHT)));
 
     if (i % 12 == 1 || i % 12 == 4 || i % 12 == 6 || i % 12 == 9 || i % 12 == 11)
     {

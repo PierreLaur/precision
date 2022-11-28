@@ -15,6 +15,7 @@
 #include "PrecisionLookAndFeel.h"
 #include "Utils.h"
 #include <map>
+
 using namespace juce;
 class MidiNote ;
 

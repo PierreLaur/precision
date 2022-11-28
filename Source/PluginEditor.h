@@ -29,33 +29,36 @@ public:
   void paint(juce::Graphics &) override;
   void resized() override;
 
+  void verticalZoom(const MouseWheelDetails wheel);
+  void horizontalZoom(const MouseWheelDetails wheel);
+  void setTransforms();
+
   void automaticZoom();
   void buttonClicked(Button *button) override;
   void setupButtons();
 
-  VerticalPiano verticalPiano;
-  MidiGrid grid;
+  VerticalPiano topPiano;
+  VerticalPiano bottomPiano;
+  MidiGrid topGrid;
+  MidiGrid bottomGrid;
 
-  LinkableViewport viewPort1;
-  LinkableViewport viewPort2;
-
+  LinkableViewport topGridView = LinkableViewport(*this);
+  LinkableViewport topPianoView = LinkableViewport(*this);
+  LinkableViewport bottomGridView = LinkableViewport(*this);
+  LinkableViewport bottomPianoView = LinkableViewport(*this);
 
 private:
   // This reference is provided as a quick way for your editor to
   // access the processor object that created it.
   PrecisionAudioProcessor &audioProcessor;
 
-  juce::TextButton horizontalZoomIn;
-  juce::TextButton horizontalZoomOut;
-  juce::TextButton verticalZoomIn;
-  juce::TextButton verticalZoomOut;
   juce::TextButton quantizeButton;
-
+  juce::TextButton optimizeButton;
 
   int defaultWidth = 1250;
   int defaultHeight = 700;
-  float widthMultiplier = 1.0f;
-  float heightMultiplier = 1.0f;
+  float widthMultiplier = 0.8f;
+  float heightMultiplier = 1.2f;
   float minWidthMultiplier ;
   float minHeightMultiplier ;
 
