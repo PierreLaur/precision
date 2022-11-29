@@ -33,33 +33,31 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   addAndMakeVisible(topPianoView);
   addAndMakeVisible(bottomPianoView);
 
-  topGridView.linkViewport(&topPianoView) ;
-  topGridView.linkViewport(&bottomPianoView) ;
-  topGridView.linkViewport(&bottomGridView) ;
+  topGridView.linkViewport(&topPianoView);
+  topGridView.linkViewport(&bottomPianoView);
+  topGridView.linkViewport(&bottomGridView);
 
-  bottomGridView.linkViewport(&topPianoView) ;
-  bottomGridView.linkViewport(&bottomPianoView) ;
-  bottomGridView.linkViewport(&topGridView) ;
+  bottomGridView.linkViewport(&topPianoView);
+  bottomGridView.linkViewport(&bottomPianoView);
+  bottomGridView.linkViewport(&topGridView);
 
   topGridView.setViewedComponent(&topGrid, false);
   bottomGridView.setViewedComponent(&bottomGrid, false);
   topPianoView.setViewedComponent(&topPiano, false);
   bottomPianoView.setViewedComponent(&bottomPiano, false);
-  
+
   topGridView.setViewPosition(Point(0, topGridView.getHeight() / 2));
   bottomGridView.setViewPosition(Point(0, bottomGridView.getHeight() / 2));
 
   topGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
-  topGridView.setScrollBarsShown(false,true) ;
+  topGridView.setScrollBarsShown(false, true, true);
   bottomGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
-  bottomGridView.setScrollBarsShown(false,true) ;
+  bottomGridView.setScrollBarsShown(false, true, true);
 
   topPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  topPianoView.setScrollBarsShown(false,false) ;
+  topPianoView.setScrollBarsShown(false, false);
   bottomPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  bottomPianoView.setScrollBarsShown(false,false) ;
-
-
+  bottomPianoView.setScrollBarsShown(false, false);
 }
 
 void PrecisionAudioProcessorEditor::setupButtons()
@@ -68,7 +66,6 @@ void PrecisionAudioProcessorEditor::setupButtons()
   quantizeButton.setButtonText("Q");
   quantizeButton.addListener(this);
   addAndMakeVisible(quantizeButton);
-
 }
 
 PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
@@ -90,31 +87,37 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
   // TODO : limit zoom so that the view stays the same size
 }
 
-void PrecisionAudioProcessorEditor::setTransforms(){
-  topPiano.setTransform(scaler.scale(1.0f,heightMultiplier));
+void PrecisionAudioProcessorEditor::setTransforms()
+{
+  topPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
   topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-  bottomPiano.setTransform(scaler.scale(1.0f,heightMultiplier));
+  bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
   bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-  std::cout << minWidthMultiplier << std::endl ;
-  std::cout << widthMultiplier << std::endl ;
-  std::cout << minHeightMultiplier << std::endl ;
-  std::cout << heightMultiplier << std::endl ;
-
 }
 
-void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel) {
-  if (wheel.deltaY > 0) {
+void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
+{
+  // TODO : better zoom
+  if (wheel.deltaY > 0)
+  {
     heightMultiplier += 0.1f;
-  } else {
+  }
+  else
+  {
     heightMultiplier = std::max(heightMultiplier - 0.1f, minHeightMultiplier);
   }
   setTransforms();
 }
 
-void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel) {
-  if (wheel.deltaY > 0) {
+void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel)
+{
+  // TODO : better zoom
+  if (wheel.deltaY > 0)
+  {
     widthMultiplier += 0.1f;
-  } else {
+  }
+  else
+  {
     widthMultiplier = std::max(widthMultiplier - 0.1f, minWidthMultiplier);
   }
   setTransforms();
@@ -129,25 +132,21 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
-  topGrid.setSize(BEAT_LENGTH_TIMESTEPS*32, 128 * NOTE_HEIGHT);
-  bottomGrid.setSize(BEAT_LENGTH_TIMESTEPS*32, 128 * NOTE_HEIGHT);
+  topGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
+  bottomGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
   topPiano.setSize(30, NOTE_HEIGHT * 128);
   bottomPiano.setSize(30, NOTE_HEIGHT * 128);
 
-  topPiano.setTransform(scaler.scale(1.0f,heightMultiplier));
-  topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-  bottomPiano.setTransform(scaler.scale(1.0f,heightMultiplier));
-  bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
 
   topGridView.setBounds(
       50, 70,
       area.getWidth() - 200,
-      250+topGridView.getHorizontalScrollBar().getHeight());
+      250 + topGridView.getHorizontalScrollBar().getHeight());
 
   bottomGridView.setBounds(
       50, 400,
       area.getWidth() - 200,
-      250+bottomGridView.getHorizontalScrollBar().getHeight());
+      250 + bottomGridView.getHorizontalScrollBar().getHeight());
 
   topPianoView.setBounds(
       20, 70,
@@ -158,6 +157,11 @@ void PrecisionAudioProcessorEditor::resized()
       20, 400,
       30,
       250);
+  
+  topPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
+  topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
+  bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
+  bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
 
   // TODO : choose scrollbars on or off
   minHeightMultiplier = static_cast<float>(topGridView.getHeight() - topGridView.getHorizontalScrollBar().getHeight()) / topGrid.getHeight();

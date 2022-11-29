@@ -13,9 +13,11 @@
 #include <JuceHeader.h>
 #include "PrecisionLookAndFeel.h"
 #include "MidiGrid.h"
+#include "NoteBorder.h"
 
 using namespace juce;
 class MidiGrid;
+class NoteBorder ;
 
 class MidiNote : public ResizableWindow
 {
@@ -29,11 +31,15 @@ public:
   float noteLength;
 
   void updateNote();
+  void updateConstraints();
+
   void mouseDrag(const MouseEvent &) override;
   void mouseUp(const MouseEvent &) override;
   void mouseDoubleClick(const MouseEvent &) override;
 
   void MidiNote::setResizable (const bool shouldBeResizable) ;
+  std::unique_ptr<NoteBorder> noteBorder;
+
 
 private:
   ComponentBoundsConstrainer noteConstrainer;

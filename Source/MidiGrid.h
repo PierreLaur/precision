@@ -38,7 +38,6 @@ public:
   void MidiGrid::quantize() ;
 
   float tempo = 120.0f ; // TODO : handle tempo changes
-  float quantizationInBeats = 1.0f ;
 
   int currentNoteID = 0 ;
 
