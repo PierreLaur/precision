@@ -33,10 +33,10 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   addAndMakeVisible(topPianoView);
   addAndMakeVisible(bottomPianoView);
 
+  // Synchronize scrolling on both viewports
   topGridView.linkViewport(&topPianoView);
   topGridView.linkViewport(&bottomPianoView);
   topGridView.linkViewport(&bottomGridView);
-
   bottomGridView.linkViewport(&topPianoView);
   bottomGridView.linkViewport(&bottomPianoView);
   bottomGridView.linkViewport(&topGridView);
@@ -46,9 +46,11 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   topPianoView.setViewedComponent(&topPiano, false);
   bottomPianoView.setViewedComponent(&bottomPiano, false);
 
-  topGridView.setViewPosition(Point(0, topGridView.getHeight() / 2));
-  bottomGridView.setViewPosition(Point(0, bottomGridView.getHeight() / 2));
+  // centers of the grids
+  topGridView.setViewPosition(Point(0, topGrid.getHeight() / 2));
+  bottomGridView.setViewPosition(Point(0, bottomGrid.getHeight() / 2));
 
+  // Hide the vertical scrollbar, show the horizontal one
   topGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
   topGridView.setScrollBarsShown(false, true, true);
   bottomGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
@@ -75,7 +77,7 @@ PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
 //==============================================================================
 void PrecisionAudioProcessorEditor::paint(Graphics &g)
 {
-  g.fillAll(Colours::darkred);
+  g.fillAll(Colours::transparentBlack);
 }
 
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)

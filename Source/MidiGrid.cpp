@@ -20,20 +20,23 @@ using namespace juce;
 //==============================================================================
 MidiGrid::MidiGrid()
 {
+  // TODO : check if this is useful
   setLookAndFeel(&lf);
 }
 
 MidiGrid::~MidiGrid()
 {
+  // TODO : handle proper object destruction for everything
 }
 
 void MidiGrid::paint(Graphics &g)
 {
   g.fillAll(Colours::lightgrey); // clear the background
-  // horizontal
 
+  // horizontal rectangles on keys corresponding to black notes
   for (int i = 0; i < 128; i++)
   {
+    // this has to be drawn longer, otherwise it doesn't go all the way
     Rectangle rect = Rectangle(Point<float>(0.0f, static_cast<float>(i * NOTE_HEIGHT)),
                                Point<float>(static_cast<float>(getRight()) * 10.0f, (static_cast<float>(i) + 1.0f) * static_cast<float>(NOTE_HEIGHT)));
 
@@ -44,16 +47,17 @@ void MidiGrid::paint(Graphics &g)
     }
   }
 
-  // vertical
+  // vertical grid lines according to quantization
   for (int i = 0; i < getWidth(); i += static_cast<int>(quantizationInBeats * BEAT_LENGTH_TIMESTEPS))
   {
     g.setColour(Colours::darkgrey);
-    // draw longer than it should be (otherwise the right part isnt drawn for some reason)
+    // this has to be drawn longer, otherwise it doesn't go all the way
     Line<float> line = Line(Point<float>(static_cast<float>(i), static_cast<float>(getY())),
                             Point<float>(static_cast<float>(i), static_cast<float>(getHeight() * 15)));
     g.drawLine(line, 1.0f);
   }
 
+  // outline around the grid
   g.setColour(Colours::black);
   auto bounds = getLocalBounds();
   auto topleft = Point(static_cast<float>(bounds.getX()), static_cast<float>(bounds.getY()));
@@ -68,6 +72,7 @@ void MidiGrid::paint(Graphics &g)
 
 void MidiGrid::resized()
 {
+  // TODO : check if useful
 }
 
 void MidiGrid::processMidiMessage(MidiMessage *message, double timeStep)
@@ -132,6 +137,7 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timeStep)
   }
 }
 
+// Process all notes in a MidiFile
 void MidiGrid::storeMidiNotes(MidiFile file)
 {
   if (file.getNumTracks() != 1)
@@ -148,7 +154,6 @@ void MidiGrid::storeMidiNotes(MidiFile file)
     processMidiMessage(&it->message, track.getEventTime(eventIndex));
     eventIndex++;
   };
-  // std::cout << "\n" << std::endl ;
 }
 
 // Create a new note where the user clicked
@@ -169,7 +174,7 @@ void MidiGrid::createMidiNote(Point<int> point)
 // Delete a note identified by ID
 void MidiGrid::deleteMidiNote(String noteID)
 {
-  // TODO : something cleaner
+  // TODO : something cleaner (actually delete the note)
   removeChildComponent(getIndexOfChildComponent(findChildWithID(noteID)));
 }
 

@@ -37,5 +37,4 @@ void NoteBorder::mouseDrag(const MouseEvent &e)
   int horizontalSnap = static_cast<int>(BEAT_LENGTH_TIMESTEPS * quantizationInBeats);
   ResizableBorderComponent::mouseDrag(e, horizontalSnap);
   parentNote.updateConstraints();
-  std::cout << constrainer->getMaximumWidth() << std::endl;
 }

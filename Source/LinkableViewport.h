@@ -14,20 +14,20 @@
 #include <list>
 
 using namespace juce;
-class PrecisionAudioProcessorEditor ;
+class PrecisionAudioProcessorEditor;
 
 class LinkableViewport : public Viewport
 {
 public:
-  LinkableViewport(PrecisionAudioProcessorEditor &) ;
+  LinkableViewport(PrecisionAudioProcessorEditor &);
 
-  void visibleAreaChanged (const Rectangle<int>& newVisibleArea) override ;
-  bool useMouseWheelMoveIfNeeded (const MouseEvent&, const MouseWheelDetails&) override;
+  void visibleAreaChanged(const Rectangle<int> &newVisibleArea) override;
+  bool useMouseWheelMoveIfNeeded(const MouseEvent &, const MouseWheelDetails &) override;
 
-  void linkViewport(Viewport * view) ;
-  std::list<Viewport *> linkedViewports ;
+  void linkViewport(Viewport *view);
+  std::list<Viewport *> linkedViewports;
 
-  PrecisionAudioProcessorEditor & editor ;
+  PrecisionAudioProcessorEditor &editor;
 
 private:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(LinkableViewport)

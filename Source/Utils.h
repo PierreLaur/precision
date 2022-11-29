@@ -17,10 +17,16 @@ using namespace juce;
 const int NOTE_HEIGHT = 16 ;
 const int NOTE_MIN_WIDTH = 10;
 const int BEAT_LENGTH_TIMESTEPS = 100;
+// TODO : change quantization
 const float quantizationInBeats = 1.0f ;
 
 double samplesToSeconds(int samples, double sampleRate);
 double samplesToBeats(int samples, double sampleRate, float tempo);
 String noteNumberToName(int noteNumber) ;
+template <typename T>
+void print(T const & value)
+{
+  std::cout << value << std::endl ;
+}
 
 MidiFile readMidiFile(String address);

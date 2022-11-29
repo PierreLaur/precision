@@ -14,10 +14,10 @@
 
 using namespace juce;
 
-class PrecisionLookAndFeel : public LookAndFeel_V1
+class PrecisionLookAndFeel : public LookAndFeel_V4
 {
 public:
-  using LookAndFeel_V1::LookAndFeel_V1;
+  using LookAndFeel_V4::LookAndFeel_V4;
 
 private:
   //==============================================================================
