@@ -34,6 +34,7 @@ void MidiGrid::paint(Graphics &g)
   g.fillAll(Colours::lightgrey); // clear the background
 
   // horizontal rectangles on keys corresponding to black notes
+  g.setColour(Colours::antiquewhite);
   for (int i = 0; i < 128; i++)
   {
     // this has to be drawn longer, otherwise it doesn't go all the way
@@ -42,7 +43,6 @@ void MidiGrid::paint(Graphics &g)
 
     if (i % 12 == 1 || i % 12 == 4 || i % 12 == 6 || i % 12 == 9 || i % 12 == 11)
     {
-      g.setColour(Colours::dimgrey);
       g.fillRect(rect);
     }
   }
@@ -245,9 +245,12 @@ Component *MidiGrid::findModelNote(Component *note)
   return modelNote;
 }
 
-Rectangle<int> correctPart(Component * note, Component * modelNote) {
-  if (note->getY() != modelNote->getY()) return Rectangle<int>() ;
-  else return note->getBounds() ;
+Rectangle<int> correctPart(Component *note, Component *modelNote)
+{
+  if (note->getY() != modelNote->getY())
+    return Rectangle<int>();
+  else
+    return note->getBounds();
 }
 
 void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g)
@@ -263,18 +266,16 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
   {
     // print the correct part in green
     g.setColour(Colours::green);
-    auto correctPart = note->getBounds().getIntersection(modelNote->getBounds()) ;
+    auto correctPart = note->getBounds().getIntersection(modelNote->getBounds());
     g.fillRect(correctPart);
 
     // outline
     g.setColour(Colours::black);
     g.drawRect(correctPart);
-    g.setOpacity(0.8f);
     g.drawArrow(Line(noteLeft, modelNoteLeft), 4.0f, 9.0f, 9.0f);
 
     g.setColour(Colours::darkred);
     g.drawArrow(Line(noteLeft, modelNoteLeft), 3.0f, 8.0f, 8.0f);
-
 
     if (analyseNoteLengths)
     {
@@ -284,11 +285,3 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
     }
   }
 }
-
-/*
-How to perform rhythm analytics ?
-For every note :
-  - What is the closest model note ?
-
-
-*/
