@@ -34,7 +34,7 @@ MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &g
 
     if (parentGrid.isStudent())
     {
-        setBackgroundColour(Colours::firebrick);
+        setBackgroundColour(Colours::darkred);
     }
     else
     {
@@ -55,11 +55,9 @@ void MidiNote::paint(Graphics &g)
     ResizableWindow::paint(g);
     g.setColour(juce::Colours::black);
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-    if (!parentGrid.isStudent())
-    {
-        updateNote();
-        g.drawText(" " + noteNumberToName(notePitch), getLocalBounds(), Justification::centredLeft);
-    }
+    updateNote();
+    g.drawText(" " + noteNumberToName(notePitch), getLocalBounds(), Justification::centredLeft);
+
 }
 
 // Update note length, start, and pitch based on its current position on the grid

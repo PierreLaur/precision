@@ -101,7 +101,6 @@ void PrecisionAudioProcessorEditor::setTransforms()
 
 void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
 {
-  // TODO : better zoom
   if (wheel.deltaY > 0)
   {
     heightMultiplier = 1.2f * heightMultiplier;
@@ -115,7 +114,6 @@ void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
 
 void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel)
 {
-  // TODO : better zoom
   if (wheel.deltaY > 0)
   {
     widthMultiplier = 1.2f * widthMultiplier;

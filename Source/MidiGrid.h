@@ -25,6 +25,8 @@ public:
   MidiGrid() ;
   ~MidiGrid() override;
   void paint(juce::Graphics &) override;
+  void paintOverChildren(juce::Graphics &) override;
+
   void resized() override;
 
   void MidiGrid::storeMidiNotes(MidiFile file);
@@ -48,6 +50,7 @@ public:
   std::map<int,MidiNote*> notesReceived ;
 
   MidiGrid * modelGrid = nullptr;
+  bool analyseNoteLengths = true ;
 
 private:
   PrecisionLookAndFeel lf;

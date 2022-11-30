@@ -69,10 +69,24 @@ void MidiGrid::paint(Graphics &g)
   g.drawLine(Line(topright, bottomright), 3.0f);
   g.drawLine(Line(bottomright, bottomleft), 3.0f);
 
-  if (isStudent()) {
-    for (auto note : getChildren()) {
-      drawNoteAnalytics(note, findModelNote(note), g) ;
-      repaint(getLocalBounds()) ;
+  paintOverChildren(g);
+}
+
+void MidiGrid::paintOverChildren(Graphics &g)
+{
+  if (isStudent())
+  {
+    if (modelGrid->getNumChildComponents() != 0)
+    {
+      for (auto note : getChildren())
+      {
+        auto modelNote = findModelNote(note);
+        g.setColour(Colours::purple);
+        g.setOpacity(0.2f);
+        g.fillRect(modelNote->getBounds());
+        drawNoteAnalytics(note, modelNote, g);
+        repaint(getLocalBounds());
+      }
     }
   }
 }
@@ -191,8 +205,9 @@ void MidiGrid::mouseDoubleClick(const MouseEvent &e)
   createMidiNote(e.getPosition());
 }
 
-bool MidiGrid::isStudent() {
-  return modelGrid!=nullptr ;
+bool MidiGrid::isStudent()
+{
+  return modelGrid != nullptr;
 }
 
 void MidiGrid::quantize()
@@ -212,32 +227,63 @@ void MidiGrid::quantize()
 }
 
 // finds the closest note to this one in the model grid
-Component * MidiGrid::findModelNote(Component * note) {
-  Component * modelNote = nullptr;
-  int minDifference = INT_MAX ;
+Component *MidiGrid::findModelNote(Component *note)
+{
+  Component *modelNote = nullptr;
+  int minDifference = INT_MAX;
   for (auto modelGridNote : modelGrid->getChildren())
   {
-    //TODO : add pitch and note length
-    int currentDifference = std::abs(modelGridNote->getX() - note->getX()) ;
-    if (currentDifference < minDifference) {
-      modelNote = modelGridNote ;
-      minDifference = currentDifference ;
+    // TODO : add pitch and note length
+    // TODO : better note coupling (don't couple to the same note, etc.)
+    int currentDifference = std::abs(modelGridNote->getX() - note->getX());
+    if (currentDifference < minDifference)
+    {
+      modelNote = modelGridNote;
+      minDifference = currentDifference;
     }
   }
-  return modelNote ;
+  return modelNote;
 }
 
-void MidiGrid::drawNoteAnalytics(Component * note, Component * modelNote, Graphics & g) {
-  auto p1 = Point(static_cast<float>(note->getX()), static_cast<float>(note->getBounds().getCentreY()));
-  auto p2 = Point(static_cast<float>(modelNote->getX()), static_cast<float>(modelNote->getBounds().getCentreY()));
+Rectangle<int> correctPart(Component * note, Component * modelNote) {
+  if (note->getY() != modelNote->getY()) return Rectangle<int>() ;
+  else return note->getBounds() ;
+}
 
-  // if (note->getX() - modelNote->getX() > 0) 
-  if (modelNote != nullptr) {
-    g.setColour(Colours::red) ;
-    g.drawLine(Line(p1,p2)) ;
+void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g)
+{
+
+  auto noteLeft = Point(static_cast<float>(note->getX()), static_cast<float>(note->getBounds().getCentreY()));
+  auto modelNoteLeft = Point(static_cast<float>(modelNote->getX()), static_cast<float>(modelNote->getBounds().getCentreY()));
+  auto noteRight = Point(static_cast<float>(note->getRight()), static_cast<float>(note->getBounds().getCentreY()));
+  auto modelNoteRight = Point(static_cast<float>(modelNote->getRight()), static_cast<float>(modelNote->getBounds().getCentreY()));
+
+  // if (note->getX() - modelNote->getX() > 0)
+  if (modelNote != nullptr)
+  {
+    // print the correct part in green
+    g.setColour(Colours::green);
+    auto correctPart = note->getBounds().getIntersection(modelNote->getBounds()) ;
+    g.fillRect(correctPart);
+
+    // outline
+    g.setColour(Colours::black);
+    g.drawRect(correctPart);
+    g.setOpacity(0.8f);
+    g.drawArrow(Line(noteLeft, modelNoteLeft), 4.0f, 9.0f, 9.0f);
+
+    g.setColour(Colours::darkred);
+    g.drawArrow(Line(noteLeft, modelNoteLeft), 3.0f, 8.0f, 8.0f);
+
+
+    if (analyseNoteLengths)
+    {
+      g.setColour(Colours::darkblue);
+      g.setOpacity(0.4f);
+      g.drawArrow(Line(noteRight, modelNoteRight), 1.5f, 5.0f, 5.0f);
+    }
   }
 }
-
 
 /*
 How to perform rhythm analytics ?
