@@ -68,6 +68,13 @@ void MidiGrid::paint(Graphics &g)
   g.drawLine(Line(topleft, topright), 3.0f);
   g.drawLine(Line(topright, bottomright), 3.0f);
   g.drawLine(Line(bottomright, bottomleft), 3.0f);
+
+  if (isStudent()) {
+    for (auto note : getChildren()) {
+      drawNoteAnalytics(note, findModelNote(note), g) ;
+      repaint(getLocalBounds()) ;
+    }
+  }
 }
 
 void MidiGrid::resized()
@@ -184,6 +191,10 @@ void MidiGrid::mouseDoubleClick(const MouseEvent &e)
   createMidiNote(e.getPosition());
 }
 
+bool MidiGrid::isStudent() {
+  return modelGrid!=nullptr ;
+}
+
 void MidiGrid::quantize()
 {
   for (auto child : getChildren())
@@ -199,3 +210,39 @@ void MidiGrid::quantize()
     child->setBounds(newBounds);
   }
 }
+
+// finds the closest note to this one in the model grid
+Component * MidiGrid::findModelNote(Component * note) {
+  Component * modelNote = nullptr;
+  int minDifference = INT_MAX ;
+  for (auto modelGridNote : modelGrid->getChildren())
+  {
+    //TODO : add pitch and note length
+    int currentDifference = std::abs(modelGridNote->getX() - note->getX()) ;
+    if (currentDifference < minDifference) {
+      modelNote = modelGridNote ;
+      minDifference = currentDifference ;
+    }
+  }
+  return modelNote ;
+}
+
+void MidiGrid::drawNoteAnalytics(Component * note, Component * modelNote, Graphics & g) {
+  auto p1 = Point(static_cast<float>(note->getX()), static_cast<float>(note->getBounds().getCentreY()));
+  auto p2 = Point(static_cast<float>(modelNote->getX()), static_cast<float>(modelNote->getBounds().getCentreY()));
+
+  // if (note->getX() - modelNote->getX() > 0) 
+  if (modelNote != nullptr) {
+    g.setColour(Colours::red) ;
+    g.drawLine(Line(p1,p2)) ;
+  }
+}
+
+
+/*
+How to perform rhythm analytics ?
+For every note :
+  - What is the closest model note ?
+
+
+*/

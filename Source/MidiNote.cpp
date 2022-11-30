@@ -16,7 +16,7 @@
 #include "NoteBorder.h"
 
 using namespace juce;
-class NoteBorder ;
+class NoteBorder;
 
 MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &grid) : ResizableWindow("noName", Colours::red, false),
                                                                                        notePitch{pitch}, noteStart{start}, noteLength{length}, parentGrid{grid}
@@ -31,7 +31,15 @@ MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &g
     setDropShadowEnabled(false);
     setMouseCursor(MouseCursor::DraggingHandCursor);
     setLookAndFeel(&lf);
-    setBackgroundColour(Colours::red);
+
+    if (parentGrid.isStudent())
+    {
+        setBackgroundColour(Colours::firebrick);
+    }
+    else
+    {
+        setBackgroundColour(Colours::purple);
+    }
 
     setViewportIgnoreDragFlag(true);
     setResizable(true);
@@ -47,8 +55,11 @@ void MidiNote::paint(Graphics &g)
     ResizableWindow::paint(g);
     g.setColour(juce::Colours::black);
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-    updateNote();
-    g.drawText(" " + noteNumberToName(notePitch), getLocalBounds(), Justification::centredLeft);
+    if (!parentGrid.isStudent())
+    {
+        updateNote();
+        g.drawText(" " + noteNumberToName(notePitch), getLocalBounds(), Justification::centredLeft);
+    }
 }
 
 // Update note length, start, and pitch based on its current position on the grid
@@ -70,16 +81,15 @@ void MidiNote::mouseDrag(const MouseEvent &e)
     }
 };
 
-void MidiNote::updateConstraints() {
+void MidiNote::updateConstraints()
+{
     noteConstrainer.setSizeLimits(NOTE_MIN_WIDTH, NOTE_HEIGHT, getParentWidth() - getX(), NOTE_HEIGHT);
 }
-
-
 
 // Update constraints on note width (to stay inside the grid) after changing its position by dragging
 void MidiNote::mouseUp(const MouseEvent &e)
 {
-    updateConstraints() ;
+    updateConstraints();
     ResizableWindow::mouseUp(e);
 };
 

@@ -16,7 +16,7 @@ class PrecisionAudioProcessorEditor;
 
 LinkableViewport::LinkableViewport(PrecisionAudioProcessorEditor &editor) : Viewport::Viewport("noName"), editor{editor}
 {
-  setSingleStepSizes(5, 5);
+  setSingleStepSizes(8, 8);
 }
 
 // Synchronizes the viewports - scrolling on one will move the others

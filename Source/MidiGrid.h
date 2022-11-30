@@ -34,14 +34,20 @@ public:
   void MidiGrid::createMidiNote(Point<int> point) ;
 
   void MidiGrid::deleteMidiNote(String noteID) ;
+  bool MidiGrid::isStudent() ;
 
   void MidiGrid::quantize() ;
+  Component * MidiGrid::findModelNote(Component * noteID);
+  void MidiGrid::drawNoteAnalytics(Component * note, Component * modelNote, Graphics & g) ;
+
 
   float tempo = 120.0f ; // TODO : handle tempo changes
 
   int currentNoteID = 0 ;
 
   std::map<int,MidiNote*> notesReceived ;
+
+  MidiGrid * modelGrid = nullptr;
 
 private:
   PrecisionLookAndFeel lf;

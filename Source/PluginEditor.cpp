@@ -60,6 +60,8 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   topPianoView.setScrollBarsShown(false, false);
   bottomPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
   bottomPianoView.setScrollBarsShown(false, false);
+
+  bottomGrid.modelGrid = &topGrid ;
 }
 
 void PrecisionAudioProcessorEditor::setupButtons()
@@ -102,11 +104,11 @@ void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
   // TODO : better zoom
   if (wheel.deltaY > 0)
   {
-    heightMultiplier += 0.1f;
+    heightMultiplier = 1.2f * heightMultiplier;
   }
   else
   {
-    heightMultiplier = std::max(heightMultiplier - 0.1f, minHeightMultiplier);
+    heightMultiplier = std::max(heightMultiplier * 0.8f, minHeightMultiplier);
   }
   setTransforms();
 }
@@ -116,11 +118,11 @@ void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel
   // TODO : better zoom
   if (wheel.deltaY > 0)
   {
-    widthMultiplier += 0.1f;
+    widthMultiplier = 1.2f * widthMultiplier;
   }
   else
   {
-    widthMultiplier = std::max(widthMultiplier - 0.1f, minWidthMultiplier);
+    widthMultiplier = std::max(widthMultiplier * 0.8f, minWidthMultiplier);
   }
   setTransforms();
 }
@@ -138,7 +140,6 @@ void PrecisionAudioProcessorEditor::resized()
   bottomGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
   topPiano.setSize(30, NOTE_HEIGHT * 128);
   bottomPiano.setSize(30, NOTE_HEIGHT * 128);
-
 
   topGridView.setBounds(
       50, 70,
@@ -159,7 +160,7 @@ void PrecisionAudioProcessorEditor::resized()
       20, 400,
       30,
       250);
-  
+
   topPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
   topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
   bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
