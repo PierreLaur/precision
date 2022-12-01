@@ -17,9 +17,11 @@ using namespace juce;
 const int NOTE_HEIGHT = 16 ;
 const int NOTE_MIN_WIDTH = 10;
 const int BEAT_LENGTH_TIMESTEPS = 100;
+const int PIANO_WIDTH = 30 ;
 // TODO : change quantization
-const float quantizationInBeats = 1.0f ;
+extern float quantizationInBeats ;
 
+void setQuantizationInBeats (float newQuantization) ; 
 double samplesToSeconds(int samples, double sampleRate);
 double samplesToBeats(int samples, double sampleRate, float tempo);
 String noteNumberToName(int noteNumber) ;

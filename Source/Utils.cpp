@@ -12,6 +12,8 @@
 #include "Utils.h"
 using namespace juce ;
 
+float quantizationInBeats = 1.0 ;
+
 double samplesToSeconds(int samples, double sampleRate) 
 {
     return samples/sampleRate ;
@@ -23,6 +25,10 @@ double samplesToBeats(int samples, double sampleRate, float tempo)
     double seconds = samples/sampleRate ;
     double beats = seconds/bps ;
     return beats ;
+}
+
+void setQuantizationInBeats (float newQuantization) {
+  quantizationInBeats = newQuantization ;
 }
 
 MidiFile readMidiFile(String address)

@@ -31,10 +31,10 @@ MidiGrid::~MidiGrid()
 
 void MidiGrid::paint(Graphics &g)
 {
-  g.fillAll(Colours::lightgrey); // clear the background
+  g.fillAll(Colours::antiquewhite); // clear the background
 
   // horizontal rectangles on keys corresponding to black notes
-  g.setColour(Colours::antiquewhite);
+  g.setColour(Colours::lightgrey);
   for (int i = 0; i < 128; i++)
   {
     // this has to be drawn longer, otherwise it doesn't go all the way
@@ -50,11 +50,12 @@ void MidiGrid::paint(Graphics &g)
   // vertical grid lines according to quantization
   for (int i = 0; i < getWidth(); i += static_cast<int>(quantizationInBeats * BEAT_LENGTH_TIMESTEPS))
   {
-    g.setColour(Colours::darkgrey);
+    if (i%BEAT_LENGTH_TIMESTEPS==0) g.setColour(Colours::black) ;
+    else g.setColour(Colours::dimgrey) ; 
     // this has to be drawn longer, otherwise it doesn't go all the way
-    Line<float> line = Line(Point<float>(static_cast<float>(i), static_cast<float>(getY())),
-                            Point<float>(static_cast<float>(i), static_cast<float>(getHeight() * 15)));
-    g.drawLine(line, 1.0f);
+    g.drawLine(Line(
+        Point(static_cast<float>(i),0.0f),
+        Point(static_cast<float>(i),static_cast<float>(getHeight() * 15))), 0.5f);
   }
 
   // outline around the grid
@@ -184,9 +185,9 @@ void MidiGrid::createMidiNote(Point<int> point)
   int noteY = point.getY() / NOTE_HEIGHT;
   MidiNote *myNote = new MidiNote(127 - noteY, start, quantizationInBeats, currentNoteID, *this);
 
-  myNote->setBounds(static_cast<int>(myNote->noteStart) * BEAT_LENGTH_TIMESTEPS,
+  myNote->setBounds(static_cast<int>(myNote->noteStart * BEAT_LENGTH_TIMESTEPS),
                     noteY * NOTE_HEIGHT,
-                    static_cast<int>(myNote->noteLength) * BEAT_LENGTH_TIMESTEPS,
+                    static_cast<int>(myNote->noteLength * BEAT_LENGTH_TIMESTEPS),
                     NOTE_HEIGHT);
   addAndMakeVisible(*myNote);
   currentNoteID += 1;

@@ -13,6 +13,7 @@
 #include "MidiGrid.h"
 #include "VerticalPiano.h"
 #include "LinkableViewport.h"
+#include "BeatScroller.h"
 
 using namespace juce;
 
@@ -33,6 +34,8 @@ public:
   void horizontalZoom(const MouseWheelDetails wheel);
   void setTransforms();
 
+  void quantizationChanged();
+
   void automaticZoom();
   void buttonClicked(Button *button) override;
   void setupButtons();
@@ -41,11 +44,16 @@ public:
   VerticalPiano bottomPiano;
   MidiGrid topGrid;
   MidiGrid bottomGrid;
+  BeatScroller topScroller;
+  BeatScroller bottomScroller;
 
   LinkableViewport topGridView = LinkableViewport(*this);
   LinkableViewport topPianoView = LinkableViewport(*this);
+  LinkableViewport topScrollerView = LinkableViewport(*this);
+
   LinkableViewport bottomGridView = LinkableViewport(*this);
   LinkableViewport bottomPianoView = LinkableViewport(*this);
+  LinkableViewport bottomScrollerView = LinkableViewport(*this);
 
 private:
   // This reference is provided as a quick way for your editor to
@@ -54,6 +62,8 @@ private:
 
   juce::TextButton quantizeButton;
   juce::TextButton optimizeButton;
+
+  juce::ComboBox quantizationSelector ;
 
   int defaultWidth = 1250;
   int defaultHeight = 700;

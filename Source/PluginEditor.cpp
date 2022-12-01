@@ -32,17 +32,28 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   addAndMakeVisible(bottomGridView);
   addAndMakeVisible(topPianoView);
   addAndMakeVisible(bottomPianoView);
+  addAndMakeVisible(topScrollerView);
+  addAndMakeVisible(bottomScrollerView);
 
   // Synchronize scrolling on both viewports
   topGridView.linkViewport(&topPianoView);
   topGridView.linkViewport(&bottomPianoView);
   topGridView.linkViewport(&bottomGridView);
+  topGridView.linkViewport(&topScrollerView);
+  topGridView.linkViewport(&bottomScrollerView);
+
   bottomGridView.linkViewport(&topPianoView);
   bottomGridView.linkViewport(&bottomPianoView);
   bottomGridView.linkViewport(&topGridView);
+  bottomGridView.linkViewport(&topScrollerView);
+  bottomGridView.linkViewport(&bottomScrollerView);
 
   topGridView.setViewedComponent(&topGrid, false);
   bottomGridView.setViewedComponent(&bottomGrid, false);
+
+  topScrollerView.setViewedComponent(&topScroller, false);
+  bottomScrollerView.setViewedComponent(&bottomScroller, false);
+
   topPianoView.setViewedComponent(&topPiano, false);
   bottomPianoView.setViewedComponent(&bottomPiano, false);
 
@@ -60,16 +71,28 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   topPianoView.setScrollBarsShown(false, false);
   bottomPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
   bottomPianoView.setScrollBarsShown(false, false);
+  topScrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
+  topScrollerView.setScrollBarsShown(false, false);
+  bottomScrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
+  bottomScrollerView.setScrollBarsShown(false, false);
 
-  bottomGrid.modelGrid = &topGrid ;
+  bottomGrid.modelGrid = &topGrid;
 }
 
 void PrecisionAudioProcessorEditor::setupButtons()
 {
   quantizeButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
-  quantizeButton.setButtonText("Q");
+  quantizeButton.setButtonText("Quantize");
   quantizeButton.addListener(this);
   addAndMakeVisible(quantizeButton);
+
+  quantizationSelector.addItem("1/4", 1) ;
+  quantizationSelector.addItem("1/8", 2) ;
+  quantizationSelector.setSelectedId(1) ;
+  quantizationInBeats = 1.0f ;
+  quantizationSelector.onChange = [this] {quantizationChanged();};
+
+  addAndMakeVisible(quantizationSelector);
 }
 
 PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
@@ -81,6 +104,22 @@ void PrecisionAudioProcessorEditor::paint(Graphics &g)
 {
   g.fillAll(Colours::transparentBlack);
 }
+
+void PrecisionAudioProcessorEditor::quantizationChanged() {
+  switch (quantizationSelector.getSelectedId())
+  {
+      case 1: 
+        quantizationInBeats = 1.0f ;  
+        repaint() ;
+        break;
+      case 2: 
+        quantizationInBeats = 0.5f ;   
+        repaint() ;
+        break;
+      default: break;
+  }
+}
+
 
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 {
@@ -97,6 +136,14 @@ void PrecisionAudioProcessorEditor::setTransforms()
   topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
   bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
   bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
+  topScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
+  bottomScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
+
+  topGridView.repaint();
+  bottomGridView.repaint();
+  topScroller.repaint();
+  bottomScroller.repaint();
+
 }
 
 void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
@@ -136,8 +183,10 @@ void PrecisionAudioProcessorEditor::resized()
 
   topGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
   bottomGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
-  topPiano.setSize(30, NOTE_HEIGHT * 128);
-  bottomPiano.setSize(30, NOTE_HEIGHT * 128);
+  topPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
+  bottomPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
+  topScroller.setSize(BEAT_LENGTH_TIMESTEPS * 32, 50);
+  bottomScroller.setSize(BEAT_LENGTH_TIMESTEPS * 32, 50);
 
   topGridView.setBounds(
       50, 70,
@@ -151,26 +200,39 @@ void PrecisionAudioProcessorEditor::resized()
 
   topPianoView.setBounds(
       20, 70,
-      30,
+      PIANO_WIDTH,
       250);
 
   bottomPianoView.setBounds(
       20, 400,
-      30,
+      PIANO_WIDTH,
       250);
 
-  topPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
-  topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-  bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
-  bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
+  topScrollerView.setBounds(
+      PIANO_WIDTH + 20, 20,
+      area.getWidth() - 200,
+      50);
+
+  bottomScrollerView.setBounds(
+      PIANO_WIDTH + 20, 350,
+      area.getWidth() - 200,
+      50);
+
+  setTransforms();
 
   // TODO : choose scrollbars on or off
   minHeightMultiplier = static_cast<float>(topGridView.getHeight() - topGridView.getHorizontalScrollBar().getHeight()) / topGrid.getHeight();
   minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / topGrid.getWidth();
 
   quantizeButton.setBounds(
-      topGridView.getRight() + 50,
-      topGridView.getY() + 120,
-      30,
-      30);
+      topGridView.getRight() + 10,
+      topGridView.getBounds().getCentreY(),
+      80,
+      25);
+
+  quantizationSelector.setBounds(
+      topGridView.getRight() + 10,
+      topGridView.getBounds().getCentreY() + 30,
+      80,
+      25);
 }

@@ -16,6 +16,7 @@
 using namespace juce ;
 class MidiNote ;
 
+
 class NoteBorder  : public ResizableBorderComponent
 {
 public:
