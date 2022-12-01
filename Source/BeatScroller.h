@@ -12,15 +12,15 @@
 
 #include <JuceHeader.h>
 
-//==============================================================================
-/*
-*/
+using namespace juce ;
+
 class BeatScroller  : public juce::Component
 {
 public:
     BeatScroller();
     ~BeatScroller() override;
 
+    void drawScrollerLine(Graphics & g, int level, float x) ;
     void paint (juce::Graphics&) override;
     void resized() override;
 

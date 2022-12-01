@@ -181,7 +181,8 @@ void MidiGrid::storeMidiNotes(MidiFile file)
 // Create a new note where the user clicked
 void MidiGrid::createMidiNote(Point<int> point)
 {
-  float start = static_cast<float>(point.getX() / BEAT_LENGTH_TIMESTEPS);
+  float start = (float)point.getX() / (float)BEAT_LENGTH_TIMESTEPS;
+  start = start - fmod(start,quantizationInBeats) ;
   int noteY = point.getY() / NOTE_HEIGHT;
   MidiNote *myNote = new MidiNote(127 - noteY, start, quantizationInBeats, currentNoteID, *this);
 

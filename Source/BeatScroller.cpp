@@ -12,15 +12,33 @@
 #include "BeatScroller.h"
 #include "Utils.h"
 
+using namespace juce ;
+
 //==============================================================================
 BeatScroller::BeatScroller()
 {
-  // In your constructor, you should add any child components, and
-  // initialise any special settings that your component needs.
 }
 
 BeatScroller::~BeatScroller()
 {
+}
+
+// draws one of three types of line at the specified location
+// Lower levels are taller (for longer units of time)
+void BeatScroller::drawScrollerLine(Graphics & g, int level, float x) {
+  switch (level)
+  {
+  case 1 :
+    g.drawLine(Line(Point(x, (float)(getHeight()) * 0.75f), Point(x,(float)getBottom())), 0.5f) ;
+    g.drawLine(Line(Point(x, (float)(getHeight()) * 0.75f), Point(x + (float)BEAT_LENGTH_TIMESTEPS / 32.0f, (float)(getHeight()) * 0.75f)));
+    break;
+  case 2 :
+    g.drawLine(Line(Point(x, (float)(getHeight()) * 0.75f), Point(x,(float)getBottom())), 0.5f) ;
+  case 3 :
+    g.drawLine(Line(Point(x, (float)(getHeight()) * 0.9f), Point(x,(float)getBottom())), 0.5f) ;
+  default:
+    break;
+  }
 }
 
 void BeatScroller::paint(juce::Graphics &g)
@@ -32,11 +50,13 @@ void BeatScroller::paint(juce::Graphics &g)
   g.setColour(juce::Colours::antiquewhite);
   for (int i = 0; i < getWidth(); i += static_cast<int>(BEAT_LENGTH_TIMESTEPS * quantizationInBeats))
   {
+    // outline beats
     if (i % BEAT_LENGTH_TIMESTEPS == 0)
     {
-      g.drawLine(Line(Point((float)i, (float)(getHeight() / 2)), Point((float)i,(float)getBottom())), 0.5f) ;
-      g.drawHorizontalLine(getHeight() / 2, static_cast<float>(i), static_cast<float>(i + BEAT_LENGTH_TIMESTEPS * quantizationInBeats / 16));
-      g.drawText(std::to_string(i / BEAT_LENGTH_TIMESTEPS),
+      drawScrollerLine(g, 1, (float)i) ;
+      
+      // TODO : handle different time signatures
+      g.drawText(std::to_string(1 + (i / BEAT_LENGTH_TIMESTEPS % 4)),
                  Rectangle(
                      Point(static_cast<float>(i), static_cast<float>(getHeight()) / 2),
                      Point(static_cast<float>(i + BEAT_LENGTH_TIMESTEPS / 4), static_cast<float>(getHeight())*0.75f)),
@@ -44,13 +64,12 @@ void BeatScroller::paint(juce::Graphics &g)
     }
     else
     {
-      g.drawVerticalLine(i, static_cast<float>(getHeight())*0.75f, static_cast<float>(getBottom()));
+      drawScrollerLine(g, 3, (float)i) ;
     }
   }
 }
 
 void BeatScroller::resized()
 {
-  // This method is where you should set the bounds of any child
-  // components that your component contains..
+  //TODO : fix the display bug when zooming/unzooming
 }

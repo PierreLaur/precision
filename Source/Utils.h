@@ -16,10 +16,11 @@ using namespace juce;
 
 const int NOTE_HEIGHT = 16 ;
 const int NOTE_MIN_WIDTH = 10;
-const int BEAT_LENGTH_TIMESTEPS = 100;
+const int BEAT_LENGTH_TIMESTEPS = 128;
 const int PIANO_WIDTH = 30 ;
-// TODO : change quantization
 extern float quantizationInBeats ;
+extern int timeSigNumerator ;
+extern int timeSigDenominator ;
 
 void setQuantizationInBeats (float newQuantization) ; 
 double samplesToSeconds(int samples, double sampleRate);

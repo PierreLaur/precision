@@ -86,9 +86,15 @@ void PrecisionAudioProcessorEditor::setupButtons()
   quantizeButton.addListener(this);
   addAndMakeVisible(quantizeButton);
 
-  quantizationSelector.addItem("1/4", 1) ;
-  quantizationSelector.addItem("1/8", 2) ;
-  quantizationSelector.setSelectedId(1) ;
+  quantizationSelector.addItem("1/1", 1) ;
+  quantizationSelector.addItem("1/2", 2) ;
+  quantizationSelector.addItem("1/4", 4) ;
+  quantizationSelector.addItem("1/8", 8) ;
+  quantizationSelector.addItem("1/16", 16) ;
+  quantizationSelector.addItem("1/32", 32) ;
+
+
+  quantizationSelector.setSelectedId(4) ;
   quantizationInBeats = 1.0f ;
   quantizationSelector.onChange = [this] {quantizationChanged();};
 
@@ -106,18 +112,8 @@ void PrecisionAudioProcessorEditor::paint(Graphics &g)
 }
 
 void PrecisionAudioProcessorEditor::quantizationChanged() {
-  switch (quantizationSelector.getSelectedId())
-  {
-      case 1: 
-        quantizationInBeats = 1.0f ;  
-        repaint() ;
-        break;
-      case 2: 
-        quantizationInBeats = 0.5f ;   
-        repaint() ;
-        break;
-      default: break;
-  }
+  quantizationInBeats = 4.0f/(float)quantizationSelector.getSelectedId() ; 
+  repaint() ;
 }
 
 
@@ -138,12 +134,6 @@ void PrecisionAudioProcessorEditor::setTransforms()
   bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
   topScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
   bottomScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
-
-  topGridView.repaint();
-  bottomGridView.repaint();
-  topScroller.repaint();
-  bottomScroller.repaint();
-
 }
 
 void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)

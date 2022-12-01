@@ -13,6 +13,8 @@
 using namespace juce ;
 
 float quantizationInBeats = 1.0 ;
+int timeSigNumerator = 4 ;
+int timeSigDenominator = 4 ;
 
 double samplesToSeconds(int samples, double sampleRate) 
 {
