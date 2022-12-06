@@ -34,7 +34,7 @@ void NoteBorder::setBorderThickness(BorderSize<int> newBorderSize)
 void NoteBorder::mouseDrag(const MouseEvent &e)
 {
 
-  int horizontalSnap = static_cast<int>(BEAT_LENGTH_TIMESTEPS * quantizationInBeats);
+  int horizontalSnap = static_cast<int>(BEAT_LENGTH_PIXELS * quantizationInBeats);
   ResizableBorderComponent::mouseDrag(e, horizontalSnap);
   parentNote.updateConstraints();
 }

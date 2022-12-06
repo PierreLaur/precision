@@ -13,6 +13,7 @@
 #include <JuceHeader.h>
 #include "MidiNote.h"
 #include "PrecisionLookAndFeel.h"
+#include "PlaybackCursor.h"
 #include "Utils.h"
 #include <map>
 
@@ -29,8 +30,8 @@ public:
 
   void resized() override;
 
-  void MidiGrid::storeMidiNotes(MidiFile file);
-  void MidiGrid::processMidiMessage(MidiMessage * message, double timeStep) ;
+  void MidiGrid::storeMidiNotes(MidiFile file, double sampleRate);
+  void MidiGrid::processMidiMessage(MidiMessage * message, double timeStep, double sampleRate) ;
 
   void MidiGrid::mouseDoubleClick(const MouseEvent &) override ;
   void MidiGrid::createMidiNote(Point<int> point) ;
@@ -42,15 +43,18 @@ public:
   Component * MidiGrid::findModelNote(Component * noteID);
   void MidiGrid::drawNoteAnalytics(Component * note, Component * modelNote, Graphics & g) ;
 
+  void MidiGrid::setCursorAtTimestep(int timeStep, double sampleRate) ;
 
   float tempo = 120.0f ; // TODO : handle tempo changes
 
-  int currentNoteID = 0 ;
+  int currentNoteID = 1 ;
 
   std::map<int,MidiNote*> notesReceived ;
 
   MidiGrid * modelGrid = nullptr;
   bool analyseNoteLengths = true ;
+
+  PlaybackCursor cursor ;
 
 private:
   PrecisionLookAndFeel lf;

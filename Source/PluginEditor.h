@@ -61,16 +61,16 @@ private:
   PrecisionAudioProcessor &audioProcessor;
 
   juce::TextButton quantizeButton;
-  juce::TextButton optimizeButton;
+  juce::TextButton recordButton;
 
-  juce::ComboBox quantizationSelector ;
+  juce::ComboBox quantizationSelector;
 
   int defaultWidth = 1250;
   int defaultHeight = 700;
   float widthMultiplier = 0.8f;
   float heightMultiplier = 1.2f;
-  float minWidthMultiplier ;
-  float minHeightMultiplier ;
+  float minWidthMultiplier;
+  float minHeightMultiplier;
 
   AffineTransform scaler = AffineTransform::AffineTransform();
 

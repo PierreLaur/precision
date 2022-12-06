@@ -10,27 +10,41 @@
 
 #include <JuceHeader.h>
 #include "Utils.h"
-using namespace juce ;
+using namespace juce;
 
-float quantizationInBeats = 1.0 ;
-int timeSigNumerator = 4 ;
-int timeSigDenominator = 4 ;
+float quantizationInBeats = 1.0;
+int timeSigNumerator = 4;
+int timeSigDenominator = 4;
 
-double samplesToSeconds(int samples, double sampleRate) 
+double samplesToSeconds(int samples, double sampleRate)
 {
-    return samples/sampleRate ;
+  return samples / sampleRate;
 }
 
-double samplesToBeats(int samples, double sampleRate, float tempo) 
+int secondsToSamples(float seconds, double sampleRate)
 {
-    double bps = tempo / 60 ;
-    double seconds = samples/sampleRate ;
-    double beats = seconds/bps ;
-    return beats ;
+  return (int)(seconds * sampleRate);
 }
 
-void setQuantizationInBeats (float newQuantization) {
-  quantizationInBeats = newQuantization ;
+double samplesToBeats(int samples, double sampleRate, float tempo)
+{
+  double bps = tempo / 60;
+  double seconds = samples / sampleRate;
+  double beats = seconds * bps;
+  return beats;
+}
+
+int beatsToSamples(double beats, double sampleRate, float tempo)
+{
+  double bps = tempo / 60;
+  double seconds = beats / bps;
+  int samples = (int) (seconds * sampleRate);
+  return samples;
+}
+
+void setQuantizationInBeats(float newQuantization)
+{
+  quantizationInBeats = newQuantization;
 }
 
 MidiFile readMidiFile(String address)
@@ -42,7 +56,8 @@ MidiFile readMidiFile(String address)
   return midiClip;
 }
 
-String noteNumberToName(int noteNumber) {
+String noteNumberToName(int noteNumber)
+{
   String noteName = "";
   switch (noteNumber % 12)
   {
@@ -83,6 +98,6 @@ String noteNumberToName(int noteNumber) {
     noteName += "B";
     break;
   }
-  noteName += String(noteNumber/12 -2) ;
-  return noteName ;
+  noteName += String(noteNumber / 12 - 2);
+  return noteName;
 }

@@ -22,6 +22,10 @@ MidiGrid::MidiGrid()
 {
   // TODO : check if this is useful
   setLookAndFeel(&lf);
+
+  addAndMakeVisible(cursor);
+  cursor.setComponentID("");
+  cursor.setBounds(-5,0,2,getHeight()) ;
 }
 
 MidiGrid::~MidiGrid()
@@ -48,14 +52,17 @@ void MidiGrid::paint(Graphics &g)
   }
 
   // vertical grid lines according to quantization
-  for (int i = 0; i < getWidth(); i += static_cast<int>(quantizationInBeats * BEAT_LENGTH_TIMESTEPS))
+  for (int i = 0; i < getWidth(); i += static_cast<int>(quantizationInBeats * BEAT_LENGTH_PIXELS))
   {
-    if (i%BEAT_LENGTH_TIMESTEPS==0) g.setColour(Colours::black) ;
-    else g.setColour(Colours::dimgrey) ; 
+    if (i % (BEAT_LENGTH_PIXELS * 4) == 0)
+      g.setColour(Colours::black);
+    else
+      g.setColour(Colours::dimgrey);
     // this has to be drawn longer, otherwise it doesn't go all the way
     g.drawLine(Line(
-        Point(static_cast<float>(i),0.0f),
-        Point(static_cast<float>(i),static_cast<float>(getHeight() * 15))), 0.5f);
+                   Point(static_cast<float>(i), 0.0f),
+                   Point(static_cast<float>(i), static_cast<float>(getHeight() * 15))),
+               0.5f);
   }
 
   // outline around the grid
@@ -73,14 +80,25 @@ void MidiGrid::paint(Graphics &g)
   paintOverChildren(g);
 }
 
+void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate) {
+  int timestepsPerBeat = beatsToSamples(1.0, sampleRate, 120.0);
+  float positionInBeats = (float)timestep / timestepsPerBeat ;
+  auto bounds = cursor.getBounds() ;
+  bounds.setX((int)(positionInBeats * BEAT_LENGTH_PIXELS)) ;
+  cursor.setBounds(bounds) ;
+}
+
 void MidiGrid::paintOverChildren(Graphics &g)
 {
   if (isStudent())
   {
-    if (modelGrid->getNumChildComponents() != 0)
+    if (modelGrid->getNumChildComponents() > 1)
     {
-      for (auto note : getChildren())
+      for (Component * note : getChildren())
       {
+        // the component with ID "" is the cursor, skip it
+        if (note->getComponentID() == "")
+          continue;
         auto modelNote = findModelNote(note);
         g.setColour(Colours::purple);
         g.setOpacity(0.2f);
@@ -94,16 +112,18 @@ void MidiGrid::paintOverChildren(Graphics &g)
 
 void MidiGrid::resized()
 {
-  // TODO : check if useful
+  cursor.setSize(2,getHeight());
 }
 
-void MidiGrid::processMidiMessage(MidiMessage *message, double timeStep)
+void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double sampleRate)
 {
+  // TODO : TEMPO
+  int timestepsPerBeat = beatsToSamples(1.0, sampleRate, 120.0);
   if (message->isNoteOn())
   {
     notesReceived[message->getNoteNumber()] = new MidiNote(
         message->getNoteNumber(),
-        static_cast<float>(timeStep) / BEAT_LENGTH_TIMESTEPS,
+        (float)(timestep) / timestepsPerBeat,
         0.0f,
         currentNoteID,
         *this);
@@ -115,10 +135,10 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timeStep)
     if (noteOnMessage != notesReceived.end())
     {
       MidiNote *newNote = noteOnMessage->second;
-      newNote->noteLength = static_cast<float>(timeStep / BEAT_LENGTH_TIMESTEPS) - newNote->noteStart;
-      newNote->setBounds(static_cast<int>(newNote->noteStart * BEAT_LENGTH_TIMESTEPS),
+      newNote->noteLength = (float)(timestep / timestepsPerBeat) - newNote->noteStart;
+      newNote->setBounds((int)(newNote->noteStart * BEAT_LENGTH_PIXELS),
                          (127 - newNote->notePitch) * NOTE_HEIGHT,
-                         static_cast<int>(newNote->noteLength * BEAT_LENGTH_TIMESTEPS),
+                         (int)(newNote->noteLength * BEAT_LENGTH_PIXELS),
                          NOTE_HEIGHT);
       addAndMakeVisible(*newNote);
       notesReceived.erase(message->getNoteNumber());
@@ -160,7 +180,7 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timeStep)
 }
 
 // Process all notes in a MidiFile
-void MidiGrid::storeMidiNotes(MidiFile file)
+void MidiGrid::storeMidiNotes(MidiFile file, double sampleRate)
 {
   if (file.getNumTracks() != 1)
   {
@@ -173,7 +193,7 @@ void MidiGrid::storeMidiNotes(MidiFile file)
   int eventIndex = 0;
   for (MidiMessageSequence::MidiEventHolder *it : track)
   {
-    processMidiMessage(&it->message, track.getEventTime(eventIndex));
+    processMidiMessage(&it->message, track.getEventTime(eventIndex), sampleRate);
     eventIndex++;
   };
 }
@@ -181,14 +201,14 @@ void MidiGrid::storeMidiNotes(MidiFile file)
 // Create a new note where the user clicked
 void MidiGrid::createMidiNote(Point<int> point)
 {
-  float start = (float)point.getX() / (float)BEAT_LENGTH_TIMESTEPS;
-  start = start - fmod(start,quantizationInBeats) ;
+  float start = (float)point.getX() / (float)BEAT_LENGTH_PIXELS;
+  start = start - fmod(start, quantizationInBeats);
   int noteY = point.getY() / NOTE_HEIGHT;
   MidiNote *myNote = new MidiNote(127 - noteY, start, quantizationInBeats, currentNoteID, *this);
 
-  myNote->setBounds(static_cast<int>(myNote->noteStart * BEAT_LENGTH_TIMESTEPS),
+  myNote->setBounds(static_cast<int>(myNote->noteStart * BEAT_LENGTH_PIXELS),
                     noteY * NOTE_HEIGHT,
-                    static_cast<int>(myNote->noteLength * BEAT_LENGTH_TIMESTEPS),
+                    static_cast<int>(myNote->noteLength * BEAT_LENGTH_PIXELS),
                     NOTE_HEIGHT);
   addAndMakeVisible(*myNote);
   currentNoteID += 1;
@@ -214,16 +234,20 @@ bool MidiGrid::isStudent()
 
 void MidiGrid::quantize()
 {
-  for (auto child : getChildren())
+  for (Component *child : getChildren())
   {
-    float currentStart = static_cast<float>(child->getX()) / BEAT_LENGTH_TIMESTEPS;
-    float currentLength = static_cast<float>(child->getWidth()) / BEAT_LENGTH_TIMESTEPS;
+    // the component with ID "" is the cursor, skip it
+    if (child->getComponentID() == "")
+      continue;
+      
+    float currentStart = (float)(child->getX()) / BEAT_LENGTH_PIXELS;
+    float currentLength = (float)(child->getWidth()) / BEAT_LENGTH_PIXELS;
 
     Rectangle<int> newBounds = child->getBounds();
     newBounds.setX(
-        static_cast<int>(std::round(currentStart / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_TIMESTEPS));
-    newBounds.setWidth(
-        static_cast<int>(std::round(currentLength / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_TIMESTEPS));
+        static_cast<int>(std::round(currentStart / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_PIXELS));
+    auto quantizedLength = std::round(currentLength / quantizationInBeats) * quantizationInBeats ;
+    newBounds.setWidth((int)(std::max(quantizedLength, quantizationInBeats)*BEAT_LENGTH_PIXELS));
     child->setBounds(newBounds);
   }
 }
@@ -233,8 +257,12 @@ Component *MidiGrid::findModelNote(Component *note)
 {
   Component *modelNote = nullptr;
   int minDifference = INT_MAX;
-  for (auto modelGridNote : modelGrid->getChildren())
+  for (Component *modelGridNote : modelGrid->getChildren())
   {
+    // the component with ID "0" is the cursor, skip it
+    if (modelGridNote->getComponentID() == "")
+      continue;
+
     // TODO : add pitch and note length
     // TODO : better note coupling (don't couple to the same note, etc.)
     int currentDifference = std::abs(modelGridNote->getX() - note->getX());

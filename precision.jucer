@@ -5,6 +5,10 @@
               pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn">
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
+      <FILE id="ncY7Hf" name="PlaybackCursor.cpp" compile="1" resource="0"
+            file="Source/PlaybackCursor.cpp"/>
+      <FILE id="rP4baJ" name="PlaybackCursor.h" compile="0" resource="0"
+            file="Source/PlaybackCursor.h"/>
       <FILE id="uwltUl" name="BeatScroller.cpp" compile="1" resource="0"
             file="Source/BeatScroller.cpp"/>
       <FILE id="tIWqQy" name="BeatScroller.h" compile="0" resource="0" file="Source/BeatScroller.h"/>

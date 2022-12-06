@@ -49,6 +49,7 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   bottomGridView.linkViewport(&bottomScrollerView);
 
   topGridView.setViewedComponent(&topGrid, false);
+
   bottomGridView.setViewedComponent(&bottomGrid, false);
 
   topScrollerView.setViewedComponent(&topScroller, false);
@@ -81,22 +82,27 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
 
 void PrecisionAudioProcessorEditor::setupButtons()
 {
-  quantizeButton.setColour(juce::TextButton::buttonColourId, juce::Colours::grey);
+  quantizeButton.setColour(TextButton::buttonColourId, Colours::grey);
   quantizeButton.setButtonText("Quantize");
   quantizeButton.addListener(this);
   addAndMakeVisible(quantizeButton);
 
-  quantizationSelector.addItem("1/1", 1) ;
-  quantizationSelector.addItem("1/2", 2) ;
-  quantizationSelector.addItem("1/4", 4) ;
-  quantizationSelector.addItem("1/8", 8) ;
-  quantizationSelector.addItem("1/16", 16) ;
-  quantizationSelector.addItem("1/32", 32) ;
+  recordButton.setColour(TextButton::buttonColourId, Colours::red);
+  recordButton.setButtonText("Record");
+  recordButton.addListener(this);
+  addAndMakeVisible(recordButton);
 
+  quantizationSelector.addItem("1/1", 1);
+  quantizationSelector.addItem("1/2", 2);
+  quantizationSelector.addItem("1/4", 4);
+  quantizationSelector.addItem("1/8", 8);
+  quantizationSelector.addItem("1/16", 16);
+  quantizationSelector.addItem("1/32", 32);
 
-  quantizationSelector.setSelectedId(4) ;
-  quantizationInBeats = 1.0f ;
-  quantizationSelector.onChange = [this] {quantizationChanged();};
+  quantizationSelector.setSelectedId(4);
+  quantizationInBeats = 1.0f;
+  quantizationSelector.onChange = [this]
+  { quantizationChanged(); };
 
   addAndMakeVisible(quantizationSelector);
 }
@@ -111,19 +117,35 @@ void PrecisionAudioProcessorEditor::paint(Graphics &g)
   g.fillAll(Colours::transparentBlack);
 }
 
-void PrecisionAudioProcessorEditor::quantizationChanged() {
-  quantizationInBeats = 4.0f/(float)quantizationSelector.getSelectedId() ; 
-  repaint() ;
+void PrecisionAudioProcessorEditor::quantizationChanged()
+{
+  quantizationInBeats = 4.0f / (float)quantizationSelector.getSelectedId();
+  repaint();
 }
-
 
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 {
 
   if (button == &quantizeButton)
     topGrid.quantize();
+  if (button == &recordButton) {
+    if (audioProcessor.isRecording) {
+      // hide the cursor
+      auto bounds = topGrid.cursor.getBounds() ;
+      bounds.setX(-5) ;
+      topGrid.cursor.setBounds(bounds) ;
+      bottomGrid.cursor.setBounds(bounds) ;
+    } else {
+      // show the cursor
+      auto bounds = topGrid.cursor.getBounds() ;
+      bounds.setX(0) ;
+      topGrid.cursor.setBounds(bounds) ;
+      bottomGrid.cursor.setBounds(bounds) ;
+    }
+    audioProcessor.blockStartTimesteps = 0;
+    audioProcessor.isRecording = !audioProcessor.isRecording;
+  }
 
-  // TODO : limit zoom so that the view stays the same size
 }
 
 void PrecisionAudioProcessorEditor::setTransforms()
@@ -171,12 +193,12 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
-  topGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
-  bottomGrid.setSize(BEAT_LENGTH_TIMESTEPS * 32, 128 * NOTE_HEIGHT);
+  topGrid.setSize(BEAT_LENGTH_PIXELS * 32, 128 * NOTE_HEIGHT);
+  bottomGrid.setSize(BEAT_LENGTH_PIXELS * 32, 128 * NOTE_HEIGHT);
   topPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
   bottomPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
-  topScroller.setSize(BEAT_LENGTH_TIMESTEPS * 32, 50);
-  bottomScroller.setSize(BEAT_LENGTH_TIMESTEPS * 32, 50);
+  topScroller.setSize(BEAT_LENGTH_PIXELS * 32, 50);
+  bottomScroller.setSize(BEAT_LENGTH_PIXELS * 32, 50);
 
   topGridView.setBounds(
       50, 70,
@@ -217,6 +239,12 @@ void PrecisionAudioProcessorEditor::resized()
   quantizeButton.setBounds(
       topGridView.getRight() + 10,
       topGridView.getBounds().getCentreY(),
+      80,
+      25);
+
+  recordButton.setBounds(
+      topGridView.getRight() + 10,
+      topGridView.getY(),
       80,
       25);
 
