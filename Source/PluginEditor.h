@@ -61,14 +61,25 @@ private:
   PrecisionAudioProcessor &audioProcessor;
 
   juce::TextButton quantizeButton;
-  juce::TextButton recordButton;
+  juce::TextButton topRecordButton;
+  juce::TextButton bottomRecordButton;
+  juce::TextButton topClearButton;
+  juce::TextButton bottomClearButton;
+  juce::TextButton updateButton;
+
+  juce::Label numBarsLabel;
+  juce::Label numBarsInput;
+  juce::Label tempoLabel;
+  juce::Label tempoInput;
+
+  juce::Label precisionAnalytics;
 
   juce::ComboBox quantizationSelector;
 
-  int defaultWidth = 1250;
+  int defaultWidth = 1400;
   int defaultHeight = 700;
   float widthMultiplier = 0.8f;
-  float heightMultiplier = 1.2f;
+  float heightMultiplier = 1.0f;
   float minWidthMultiplier;
   float minHeightMultiplier;
 

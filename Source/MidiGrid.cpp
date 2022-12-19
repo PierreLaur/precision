@@ -25,7 +25,7 @@ MidiGrid::MidiGrid()
 
   addAndMakeVisible(cursor);
   cursor.setComponentID("");
-  cursor.setBounds(-5,0,2,getHeight()) ;
+  cursor.setBounds(-5, 0, 2, getHeight());
 }
 
 MidiGrid::~MidiGrid()
@@ -80,21 +80,50 @@ void MidiGrid::paint(Graphics &g)
   paintOverChildren(g);
 }
 
-void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate) {
-  int timestepsPerBeat = beatsToSamples(1.0, sampleRate, 120.0);
-  float positionInBeats = (float)timestep / timestepsPerBeat ;
-  auto bounds = cursor.getBounds() ;
-  bounds.setX((int)(positionInBeats * BEAT_LENGTH_PIXELS)) ;
-  cursor.setBounds(bounds) ;
+void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate)
+{
+  int timestepsPerBeat = beatsToSamples(1.0, sampleRate);
+  float positionInBeats = (float)timestep / timestepsPerBeat;
+  auto bounds = cursor.getBounds();
+  bounds.setX((int)(positionInBeats * BEAT_LENGTH_PIXELS));
+  cursor.setBounds(bounds);
+}
+
+void MidiGrid::hideCursor()
+{
+  auto bounds = cursor.getBounds();
+  bounds.setX(-5);
+  cursor.setBounds(bounds);
+}
+
+void MidiGrid::setCursorAtZero()
+{
+  auto bounds = cursor.getBounds();
+  bounds.setX(0);
+  cursor.setBounds(bounds);
+}
+
+double getDeviation(Component *note, Component *modelNote)
+{
+  int deviationPixels = modelNote->getX() - note->getX();
+  double deviationBeats = (double)deviationPixels / BEAT_LENGTH_PIXELS;
+  double deviationMs = 1000.0 * 60.0 * deviationBeats / (double)tempo;
+  return deviationMs;
 }
 
 void MidiGrid::paintOverChildren(Graphics &g)
 {
   if (isStudent())
   {
-    if (modelGrid->getNumChildComponents() > 1)
+    // the cursor is a component too, so substract one
+    int numNotes = modelGrid->getNumChildComponents() - 1;
+    if (numNotes > 0)
     {
-      for (Component * note : getChildren())
+      double newAverageAbsoluteDeviationMs = 0.0;
+      double newAverageDeviationMs = 0.0;
+      double newAverageAbsoluteDeviationToLengthMs = 0.0;
+      double newAverageDeviationToLengthMs = 0.0;
+      for (Component *note : getChildren())
       {
         // the component with ID "" is the cursor, skip it
         if (note->getComponentID() == "")
@@ -104,21 +133,27 @@ void MidiGrid::paintOverChildren(Graphics &g)
         g.setOpacity(0.2f);
         g.fillRect(modelNote->getBounds());
         drawNoteAnalytics(note, modelNote, g);
-        repaint(getLocalBounds());
+
+        double deviation = getDeviation(note, modelNote);
+        newAverageDeviationMs += deviation;
+        newAverageAbsoluteDeviationMs += abs(deviation);
       }
+      repaint(getLocalBounds());
+      averageAbsoluteDeviationMs = newAverageAbsoluteDeviationMs / numNotes;
+      averageDeviationMs = newAverageDeviationMs / numNotes;
     }
   }
 }
 
 void MidiGrid::resized()
 {
-  cursor.setSize(2,getHeight());
+  cursor.setSize(1, getHeight());
 }
 
 void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double sampleRate)
 {
   // TODO : TEMPO
-  int timestepsPerBeat = beatsToSamples(1.0, sampleRate, 120.0);
+  int timestepsPerBeat = beatsToSamples(1.0, sampleRate);
   if (message->isNoteOn())
   {
     notesReceived[message->getNoteNumber()] = new MidiNote(
@@ -221,6 +256,19 @@ void MidiGrid::deleteMidiNote(String noteID)
   removeChildComponent(getIndexOfChildComponent(findChildWithID(noteID)));
 }
 
+void MidiGrid::clearNotes()
+{
+  // TODO : debug (if many notes, some are not removed)
+  for (Component *note : getChildren())
+  {
+    // the component with ID "" is the cursor, skip it
+    if (note->getComponentID() == "")
+      continue;
+    deleteMidiNote(note->getComponentID());
+  }
+  repaint(getLocalBounds());
+}
+
 void MidiGrid::mouseDoubleClick(const MouseEvent &e)
 {
   Component::mouseDoubleClick(e);
@@ -239,15 +287,15 @@ void MidiGrid::quantize()
     // the component with ID "" is the cursor, skip it
     if (child->getComponentID() == "")
       continue;
-      
+
     float currentStart = (float)(child->getX()) / BEAT_LENGTH_PIXELS;
     float currentLength = (float)(child->getWidth()) / BEAT_LENGTH_PIXELS;
 
     Rectangle<int> newBounds = child->getBounds();
     newBounds.setX(
         static_cast<int>(std::round(currentStart / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_PIXELS));
-    auto quantizedLength = std::round(currentLength / quantizationInBeats) * quantizationInBeats ;
-    newBounds.setWidth((int)(std::max(quantizedLength, quantizationInBeats)*BEAT_LENGTH_PIXELS));
+    auto quantizedLength = std::round(currentLength / quantizationInBeats) * quantizationInBeats;
+    newBounds.setWidth((int)(std::max(quantizedLength, quantizationInBeats) * BEAT_LENGTH_PIXELS));
     child->setBounds(newBounds);
   }
 }
@@ -307,7 +355,7 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
     g.setColour(Colours::darkred);
     g.drawArrow(Line(noteLeft, modelNoteLeft), 3.0f, 8.0f, 8.0f);
 
-    if (analyseNoteLengths)
+    if (analyzeNoteLengths)
     {
       g.setColour(Colours::darkblue);
       g.setOpacity(0.4f);

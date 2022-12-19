@@ -10,63 +10,66 @@
 
 #include <JuceHeader.h>
 
-using namespace juce ;
+using namespace juce;
 
-class PrecisionAudioProcessorEditor ;
+class PrecisionAudioProcessorEditor;
 
 //==============================================================================
 /**
-*/
-class PrecisionAudioProcessor  : public AudioProcessor
-                            #if JucePlugin_Enable_ARA
-                             , public AudioProcessorARAExtension
-                            #endif
+ */
+class PrecisionAudioProcessor : public AudioProcessor
+#if JucePlugin_Enable_ARA
+    ,
+                                public AudioProcessorARAExtension
+#endif
 {
 public:
-    int velocity ;
+  int velocity;
 
-    //==============================================================================
-    PrecisionAudioProcessor();
-    ~PrecisionAudioProcessor() override;
-    
-    //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override;
+  //==============================================================================
+  PrecisionAudioProcessor();
+  ~PrecisionAudioProcessor() override;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
-   #endif
+  //==============================================================================
+  void prepareToPlay(double sampleRate, int samplesPerBlock) override;
+  void releaseResources() override;
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+#ifndef JucePlugin_PreferredChannelConfigurations
+  bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
+#endif
 
-    //==============================================================================
-    AudioProcessorEditor* createEditor() override;
-    bool hasEditor() const override;
-    PrecisionAudioProcessorEditor* editor ;
+  void processBlock(AudioBuffer<float> &, MidiBuffer &) override;
 
-    //==============================================================================
-    const String getName() const override;
+  //==============================================================================
+  AudioProcessorEditor *createEditor() override;
+  bool hasEditor() const override;
+  PrecisionAudioProcessorEditor *editor;
 
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool isMidiEffect() const override;
-    double getTailLengthSeconds() const override;
+  //==============================================================================
+  const String getName() const override;
 
-    //==============================================================================
-    int getNumPrograms() override;
-    int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
-    void changeProgramName (int index, const String& newName) override;
+  bool acceptsMidi() const override;
+  bool producesMidi() const override;
+  bool isMidiEffect() const override;
+  double getTailLengthSeconds() const override;
 
-    //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+  //==============================================================================
+  int getNumPrograms() override;
+  int getCurrentProgram() override;
+  void setCurrentProgram(int index) override;
+  const String getProgramName(int index) override;
+  void changeProgramName(int index, const String &newName) override;
 
-    bool isRecording = false ;
-    int blockStartTimesteps = 0 ;
+  //==============================================================================
+  void getStateInformation(MemoryBlock &destData) override;
+  void setStateInformation(const void *data, int sizeInBytes) override;
+
+  bool studentRecording = false;
+  bool modelRecording = false;
+
+  int blockStartTimesteps = 0;
 
 private:
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PrecisionAudioProcessor)
+  //==============================================================================
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PrecisionAudioProcessor)
 };

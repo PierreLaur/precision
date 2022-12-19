@@ -27,16 +27,11 @@ PlaybackCursor::~PlaybackCursor()
 
 void PlaybackCursor::paint (juce::Graphics& g)
 {
-    g.fillAll (Colours::blue);   // clear the background
-
-    g.setColour (juce::Colours::black);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+    g.fillAll (Colours::black);   // clear the background
 
 }
 
 void PlaybackCursor::resized()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
 
 }

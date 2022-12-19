@@ -21,7 +21,7 @@ class NoteBorder;
 MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &grid) : ResizableWindow("noName", Colours::red, false),
                                                                                        notePitch{pitch}, noteStart{start}, noteLength{length}, parentGrid{grid}
 {
-    setComponentID(std::to_string(noteID));
+    setComponentID(String(noteID));
 
     // Notes must stay inside the grid
     setConstrainer(&noteConstrainer);
@@ -57,7 +57,6 @@ void MidiNote::paint(Graphics &g)
     g.drawRect(getLocalBounds(), 1); // draw an outline around the component
     updateNote();
     g.drawText(" " + noteNumberToName(notePitch), getLocalBounds(), Justification::centredLeft);
-
 }
 
 // Update note length, start, and pitch based on its current position on the grid

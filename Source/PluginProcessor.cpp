@@ -176,15 +176,26 @@ void PrecisionAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juc
     // MIDI
     {
         // update the cursor during recording
-        if (isRecording) {
+        if (studentRecording || modelRecording)
+        {
             editor->topGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
             editor->bottomGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
+
+            // int numSamplesAfterBeat = blockStartTimesteps%beatsToSamples(1.0,sampleRate) ;
+            // int numSamplesBeforeBeat = beatsToSamples(1.0,sampleRate) - numSamplesAfterBeat ;
+            // if (numSamplesAfterBeat < numSamples || numSamplesBeforeBeat < numSamples) {
+            //     print(samplesToBeats(blockStartTimesteps,sampleRate)) ;
+            // }
         }
         for (const auto metadata : midiMessages)
         {
             int timestep = metadata.samplePosition;
             auto message = metadata.getMessage();
-            if (isRecording)
+            if (studentRecording)
+            {
+                editor->bottomGrid.processMidiMessage(&message, blockStartTimesteps + timestep, sampleRate);
+            }
+            if (modelRecording)
             {
                 editor->topGrid.processMidiMessage(&message, blockStartTimesteps + timestep, sampleRate);
             }

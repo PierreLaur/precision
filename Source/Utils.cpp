@@ -15,6 +15,8 @@ using namespace juce;
 float quantizationInBeats = 1.0;
 int timeSigNumerator = 4;
 int timeSigDenominator = 4;
+int numBars = 8;
+float tempo = 120.0;
 
 double samplesToSeconds(int samples, double sampleRate)
 {
@@ -26,7 +28,7 @@ int secondsToSamples(float seconds, double sampleRate)
   return (int)(seconds * sampleRate);
 }
 
-double samplesToBeats(int samples, double sampleRate, float tempo)
+double samplesToBeats(int samples, double sampleRate)
 {
   double bps = tempo / 60;
   double seconds = samples / sampleRate;
@@ -34,11 +36,11 @@ double samplesToBeats(int samples, double sampleRate, float tempo)
   return beats;
 }
 
-int beatsToSamples(double beats, double sampleRate, float tempo)
+int beatsToSamples(double beats, double sampleRate)
 {
   double bps = tempo / 60;
   double seconds = beats / bps;
-  int samples = (int) (seconds * sampleRate);
+  int samples = (int)(seconds * sampleRate);
   return samples;
 }
 

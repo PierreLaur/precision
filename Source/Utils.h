@@ -14,24 +14,26 @@
 
 using namespace juce;
 
-const int NOTE_HEIGHT = 16 ;
+const int NOTE_HEIGHT = 16;
 const int NOTE_MIN_WIDTH = 10;
 const int BEAT_LENGTH_PIXELS = 128;
-const int PIANO_WIDTH = 30 ;
-extern float quantizationInBeats ;
-extern int timeSigNumerator ;
-extern int timeSigDenominator ;
+const int PIANO_WIDTH = 30;
+extern float quantizationInBeats;
+extern float tempo;
+extern int timeSigNumerator;
+extern int timeSigDenominator;
+extern int numBars;
 
-void setQuantizationInBeats (float newQuantization) ; 
+void setQuantizationInBeats(float newQuantization);
 double samplesToSeconds(int samples, double sampleRate);
 int secondsToSamples(float samples, double sampleRate);
-double samplesToBeats(int samples, double sampleRate, float tempo);
-int beatsToSamples(double beats, double sampleRate, float tempo);
-String noteNumberToName(int noteNumber) ;
+double samplesToBeats(int samples, double sampleRate);
+int beatsToSamples(double beats, double sampleRate);
+String noteNumberToName(int noteNumber);
 template <typename T>
-void print(T const & value)
+void print(T const &value)
 {
-  std::cout << value << std::endl ;
+  std::cout << value << std::endl;
 }
 
 MidiFile readMidiFile(String address);

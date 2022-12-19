@@ -31,6 +31,7 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   addAndMakeVisible(topGridView);
   addAndMakeVisible(bottomGridView);
   addAndMakeVisible(topPianoView);
+
   addAndMakeVisible(bottomPianoView);
   addAndMakeVisible(topScrollerView);
   addAndMakeVisible(bottomScrollerView);
@@ -80,6 +81,48 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   bottomGrid.modelGrid = &topGrid;
 }
 
+int getTempoFromString(String text)
+{
+  std::string std_text = text.toStdString();
+  for (int i = 0; i < text.length(); i++)
+  {
+    if (!isdigit(std_text.at(i)))
+    {
+      return -1;
+    }
+  }
+  int newTempo = text.getIntValue();
+  if (newTempo < 30 || newTempo > 300)
+  {
+    return -1;
+  }
+  else
+  {
+    return newTempo;
+  }
+}
+
+int getNumBarsFromString(String text)
+{
+  std::string std_text = text.toStdString();
+  for (int i = 0; i < text.length(); i++)
+  {
+    if (!isdigit(std_text.at(i)))
+    {
+      return -1;
+    }
+  }
+  int newNumBars = text.getIntValue();
+  if (newNumBars < 1 || newNumBars > 128)
+  {
+    return -1;
+  }
+  else
+  {
+    return newNumBars;
+  }
+}
+
 void PrecisionAudioProcessorEditor::setupButtons()
 {
   quantizeButton.setColour(TextButton::buttonColourId, Colours::grey);
@@ -87,10 +130,103 @@ void PrecisionAudioProcessorEditor::setupButtons()
   quantizeButton.addListener(this);
   addAndMakeVisible(quantizeButton);
 
-  recordButton.setColour(TextButton::buttonColourId, Colours::red);
-  recordButton.setButtonText("Record");
-  recordButton.addListener(this);
-  addAndMakeVisible(recordButton);
+  topRecordButton.setColour(TextButton::buttonColourId, Colours::red);
+  topRecordButton.setButtonText("Record");
+  topRecordButton.addListener(this);
+  addAndMakeVisible(topRecordButton);
+
+  bottomRecordButton.setColour(TextButton::buttonColourId, Colours::red);
+  bottomRecordButton.setButtonText("Record");
+  bottomRecordButton.addListener(this);
+  addAndMakeVisible(bottomRecordButton);
+
+  topClearButton.setColour(TextButton::buttonColourId, Colours::blue);
+  topClearButton.setButtonText("Clear");
+  topClearButton.addListener(this);
+  addAndMakeVisible(topClearButton);
+
+  bottomClearButton.setColour(TextButton::buttonColourId, Colours::blue);
+  bottomClearButton.setButtonText("Clear");
+  bottomClearButton.addListener(this);
+  addAndMakeVisible(bottomClearButton);
+
+  updateButton.setColour(TextButton::buttonColourId, Colours::purple);
+  updateButton.setButtonText("Update");
+  updateButton.addListener(this);
+  addAndMakeVisible(updateButton);
+
+  addAndMakeVisible(numBarsLabel);
+  numBarsLabel.setText("Bars : ", dontSendNotification);
+  numBarsLabel.setJustificationType(Justification::centred);
+
+  addAndMakeVisible(tempoLabel);
+  tempoLabel.setText("Tempo : ", dontSendNotification);
+  tempoLabel.setJustificationType(Justification::centred);
+
+  addAndMakeVisible(precisionAnalytics);
+  precisionAnalytics.setText(
+      "Precision Analytics : \n\n\n\
+    Average Absolute Deviation : " +
+          String(bottomGrid.averageAbsoluteDeviationMs) + " ms\n\
+    Average Deviation : " +
+          String(bottomGrid.averageDeviationMs) + " ms",
+      dontSendNotification);
+  precisionAnalytics.setJustificationType(Justification::centredTop);
+
+  addAndMakeVisible(numBarsInput);
+  numBarsInput.setText(String(numBars), dontSendNotification);
+  numBarsInput.setJustificationType(Justification::left);
+  numBarsInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
+  numBarsInput.setEditable(true);
+  numBarsInput.onTextChange = [this]
+  {
+    int inputInt = getNumBarsFromString(numBarsInput.getText());
+    if (inputInt != -1)
+    {
+      numBars = inputInt;
+      minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / (BEAT_LENGTH_PIXELS * numBars * timeSigNumerator);
+      widthMultiplier = std::max(widthMultiplier * 0.8f, minWidthMultiplier);
+
+      topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+      bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+      topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+      bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+
+      setTransforms();
+    }
+    else
+    {
+      numBarsInput.setText(String(numBars), dontSendNotification);
+    }
+  };
+
+  addAndMakeVisible(tempoInput);
+  tempoInput.setText(String(tempo), dontSendNotification);
+  tempoInput.setJustificationType(Justification::left);
+  tempoInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
+  tempoInput.setEditable(true);
+  tempoInput.onTextChange = [this]
+  {
+    int inputInt = getTempoFromString(tempoInput.getText());
+    if (inputInt != -1)
+    {
+      tempo = (float)inputInt;
+      print(tempo);
+      // minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / (BEAT_LENGTH_PIXELS * numBars * timeSigNumerator);
+      // widthMultiplier = std::max(widthMultiplier * 0.8f, minWidthMultiplier);
+
+      // topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+      // bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+      // topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+      // bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+
+      // setTransforms();
+    }
+    else
+    {
+      tempoInput.setText(String(tempo), dontSendNotification);
+    }
+  };
 
   quantizationSelector.addItem("1/1", 1);
   quantizationSelector.addItem("1/2", 2);
@@ -128,24 +264,56 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 
   if (button == &quantizeButton)
     topGrid.quantize();
-  if (button == &recordButton) {
-    if (audioProcessor.isRecording) {
-      // hide the cursor
-      auto bounds = topGrid.cursor.getBounds() ;
-      bounds.setX(-5) ;
-      topGrid.cursor.setBounds(bounds) ;
-      bottomGrid.cursor.setBounds(bounds) ;
-    } else {
-      // show the cursor
-      auto bounds = topGrid.cursor.getBounds() ;
-      bounds.setX(0) ;
-      topGrid.cursor.setBounds(bounds) ;
-      bottomGrid.cursor.setBounds(bounds) ;
+  if (button == &topRecordButton)
+  {
+    if (audioProcessor.modelRecording || audioProcessor.studentRecording)
+    {
+      topGrid.hideCursor();
+      bottomGrid.hideCursor();
+    }
+    else
+    {
+      topGrid.setCursorAtZero();
+      bottomGrid.setCursorAtZero();
     }
     audioProcessor.blockStartTimesteps = 0;
-    audioProcessor.isRecording = !audioProcessor.isRecording;
+    audioProcessor.modelRecording = !audioProcessor.modelRecording;
+    audioProcessor.studentRecording = false;
   }
-
+  if (button == &bottomRecordButton)
+  {
+    if (audioProcessor.modelRecording || audioProcessor.studentRecording)
+    {
+      topGrid.hideCursor();
+      bottomGrid.hideCursor();
+    }
+    else
+    {
+      topGrid.setCursorAtZero();
+      bottomGrid.setCursorAtZero();
+    }
+    audioProcessor.blockStartTimesteps = 0;
+    audioProcessor.studentRecording = !audioProcessor.studentRecording;
+    audioProcessor.modelRecording = false;
+  }
+  if (button == &updateButton)
+  {
+    precisionAnalytics.setText(
+        "Precision Analytics : \n\n\n\
+    Average Absolute Deviation : " +
+            String(bottomGrid.averageAbsoluteDeviationMs) + " ms\n\
+    Average Deviation : " +
+            String(bottomGrid.averageDeviationMs) + " ms",
+        dontSendNotification);
+  }
+  if (button == &topClearButton)
+  {
+    topGrid.clearNotes();
+  }
+  if (button == &bottomClearButton)
+  {
+    bottomGrid.clearNotes();
+  }
 }
 
 void PrecisionAudioProcessorEditor::setTransforms()
@@ -193,21 +361,22 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
-  topGrid.setSize(BEAT_LENGTH_PIXELS * 32, 128 * NOTE_HEIGHT);
-  bottomGrid.setSize(BEAT_LENGTH_PIXELS * 32, 128 * NOTE_HEIGHT);
+  topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+  bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+  topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+  bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+
   topPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
   bottomPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
-  topScroller.setSize(BEAT_LENGTH_PIXELS * 32, 50);
-  bottomScroller.setSize(BEAT_LENGTH_PIXELS * 32, 50);
 
   topGridView.setBounds(
       50, 70,
-      area.getWidth() - 200,
+      area.getWidth() - 400,
       250 + topGridView.getHorizontalScrollBar().getHeight());
 
   bottomGridView.setBounds(
       50, 400,
-      area.getWidth() - 200,
+      area.getWidth() - 400,
       250 + bottomGridView.getHorizontalScrollBar().getHeight());
 
   topPianoView.setBounds(
@@ -222,12 +391,12 @@ void PrecisionAudioProcessorEditor::resized()
 
   topScrollerView.setBounds(
       PIANO_WIDTH + 20, 20,
-      area.getWidth() - 200,
+      area.getWidth() - 400,
       50);
 
   bottomScrollerView.setBounds(
       PIANO_WIDTH + 20, 350,
-      area.getWidth() - 200,
+      area.getWidth() - 400,
       50);
 
   setTransforms();
@@ -236,15 +405,47 @@ void PrecisionAudioProcessorEditor::resized()
   minHeightMultiplier = static_cast<float>(topGridView.getHeight() - topGridView.getHorizontalScrollBar().getHeight()) / topGrid.getHeight();
   minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / topGrid.getWidth();
 
+  numBarsLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 40, 50, 20);
+  numBarsInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 40, 30, 20);
+  tempoLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 80, 50, 20);
+  tempoInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 80, 30, 20);
+
+  precisionAnalytics.setBounds(bottomGridView.getRight() + 10, bottomGridView.getBounds().getY(),
+                               getWidth() - bottomGridView.getRight() - 20, bottomGridView.getHeight() - 35);
+
   quantizeButton.setBounds(
       topGridView.getRight() + 10,
       topGridView.getBounds().getCentreY(),
       80,
       25);
 
-  recordButton.setBounds(
-      topGridView.getRight() + 10,
-      topGridView.getY(),
+  topRecordButton.setBounds(
+      topScrollerView.getRight() + 10,
+      topScrollerView.getY(),
+      80,
+      25);
+
+  bottomRecordButton.setBounds(
+      bottomScrollerView.getRight() + 10,
+      bottomScrollerView.getY(),
+      80,
+      25);
+
+  topClearButton.setBounds(
+      topScrollerView.getRight() + 10,
+      topScrollerView.getY() + 30,
+      80,
+      25);
+
+  bottomClearButton.setBounds(
+      bottomScrollerView.getRight() + 10,
+      bottomScrollerView.getY() + 30,
+      80,
+      25);
+
+  updateButton.setBounds(
+      precisionAnalytics.getBounds().getCentreX() - 40,
+      precisionAnalytics.getBottom() + 10,
       80,
       25);
 
