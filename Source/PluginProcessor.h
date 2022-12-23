@@ -9,6 +9,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "Metronome.h"
 
 using namespace juce;
 
@@ -68,8 +69,10 @@ public:
   bool modelRecording = false;
 
   int blockStartTimesteps = 0;
+  Metronome metronome ;
 
 private:
   //==============================================================================
+  Random random ;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PrecisionAudioProcessor)
 };

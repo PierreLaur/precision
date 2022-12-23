@@ -16,7 +16,7 @@ float quantizationInBeats = 1.0;
 int timeSigNumerator = 4;
 int timeSigDenominator = 4;
 int numBars = 8;
-float tempo = 120.0;
+double tempo = 120.0;
 
 double samplesToSeconds(int samples, double sampleRate)
 {
@@ -30,7 +30,7 @@ int secondsToSamples(float seconds, double sampleRate)
 
 double samplesToBeats(int samples, double sampleRate)
 {
-  double bps = tempo / 60;
+  double bps = tempo / 60.0;
   double seconds = samples / sampleRate;
   double beats = seconds * bps;
   return beats;
@@ -38,7 +38,7 @@ double samplesToBeats(int samples, double sampleRate)
 
 int beatsToSamples(double beats, double sampleRate)
 {
-  double bps = tempo / 60;
+  double bps = tempo / 60.0;
   double seconds = beats / bps;
   int samples = (int)(seconds * sampleRate);
   return samples;

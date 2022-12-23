@@ -19,7 +19,7 @@ const int NOTE_MIN_WIDTH = 10;
 const int BEAT_LENGTH_PIXELS = 128;
 const int PIANO_WIDTH = 30;
 extern float quantizationInBeats;
-extern float tempo;
+extern double tempo;
 extern int timeSigNumerator;
 extern int timeSigDenominator;
 extern int numBars;

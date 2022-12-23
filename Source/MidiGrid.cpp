@@ -83,9 +83,9 @@ void MidiGrid::paint(Graphics &g)
 void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate)
 {
   int timestepsPerBeat = beatsToSamples(1.0, sampleRate);
-  float positionInBeats = (float)timestep / timestepsPerBeat;
+  int positionInPixels = (int)((double)(BEAT_LENGTH_PIXELS * timestep) / timestepsPerBeat);
   auto bounds = cursor.getBounds();
-  bounds.setX((int)(positionInBeats * BEAT_LENGTH_PIXELS));
+  bounds.setX(positionInPixels);
   cursor.setBounds(bounds);
 }
 
@@ -105,7 +105,7 @@ void MidiGrid::setCursorAtZero()
 
 double getDeviation(Component *note, Component *modelNote)
 {
-  int deviationPixels = modelNote->getX() - note->getX();
+  int deviationPixels = note->getX() - modelNote->getX();
   double deviationBeats = (double)deviationPixels / BEAT_LENGTH_PIXELS;
   double deviationMs = 1000.0 * 60.0 * deviationBeats / (double)tempo;
   return deviationMs;

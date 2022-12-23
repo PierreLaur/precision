@@ -275,8 +275,9 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
     {
       topGrid.setCursorAtZero();
       bottomGrid.setCursorAtZero();
+      audioProcessor.metronome.reset();
+      audioProcessor.blockStartTimesteps = 0;
     }
-    audioProcessor.blockStartTimesteps = 0;
     audioProcessor.modelRecording = !audioProcessor.modelRecording;
     audioProcessor.studentRecording = false;
   }
@@ -291,8 +292,9 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
     {
       topGrid.setCursorAtZero();
       bottomGrid.setCursorAtZero();
+      audioProcessor.metronome.reset();
+      audioProcessor.blockStartTimesteps = 0;
     }
-    audioProcessor.blockStartTimesteps = 0;
     audioProcessor.studentRecording = !audioProcessor.studentRecording;
     audioProcessor.modelRecording = false;
   }

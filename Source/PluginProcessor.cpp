@@ -104,8 +104,7 @@ void PrecisionAudioProcessor::changeProgramName(int index, const juce::String &n
 //==============================================================================
 void PrecisionAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    metronome.prepareToPlay(samplesPerBlock, sampleRate);
 }
 
 void PrecisionAudioProcessor::releaseResources()
@@ -165,28 +164,15 @@ void PrecisionAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juc
         // the samples and the outer loop is handling the channels.
         // Alternatively, you can process the samples with the channels
         // interleaved by keeping the same state.
-        for (int channel = 0; channel < totalNumInputChannels; ++channel)
-        {
-            auto *channelData = buffer.getWritePointer(channel);
 
-            // ..do something to the data...
+        if (studentRecording || modelRecording)
+        {
+            metronome.count(buffer, totalNumOutputChannels, numSamples, sampleRate);
         }
     }
 
     // MIDI
     {
-        // update the cursor during recording
-        if (studentRecording || modelRecording)
-        {
-            editor->topGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
-            editor->bottomGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
-
-            // int numSamplesAfterBeat = blockStartTimesteps%beatsToSamples(1.0,sampleRate) ;
-            // int numSamplesBeforeBeat = beatsToSamples(1.0,sampleRate) - numSamplesAfterBeat ;
-            // if (numSamplesAfterBeat < numSamples || numSamplesBeforeBeat < numSamples) {
-            //     print(samplesToBeats(blockStartTimesteps,sampleRate)) ;
-            // }
-        }
         for (const auto metadata : midiMessages)
         {
             int timestep = metadata.samplePosition;
@@ -200,7 +186,25 @@ void PrecisionAudioProcessor::processBlock(juce::AudioBuffer<float> &buffer, juc
                 editor->topGrid.processMidiMessage(&message, blockStartTimesteps + timestep, sampleRate);
             }
         }
+    }
+
+    // update the cursor during recording
+    if (studentRecording || modelRecording)
+    {
+        editor->topGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
+        editor->bottomGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
         blockStartTimesteps += numSamples;
+    }
+
+    // end of the recording zone
+    int maxSamples = numBars * timeSigNumerator * beatsToSamples(1.0, sampleRate) ;
+    if (blockStartTimesteps > maxSamples)
+    {
+        studentRecording = false;
+        modelRecording = false;
+        editor->topGrid.hideCursor();
+        editor->bottomGrid.hideCursor();
+        blockStartTimesteps -= maxSamples ;
     }
 }
 

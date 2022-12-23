@@ -78,7 +78,7 @@ private:
 
   int defaultWidth = 1400;
   int defaultHeight = 700;
-  float widthMultiplier = 0.8f;
+  float widthMultiplier = 1.0f;
   float heightMultiplier = 1.0f;
   float minWidthMultiplier;
   float minHeightMultiplier;

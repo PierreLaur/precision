@@ -2,9 +2,12 @@
 
 <JUCERPROJECT id="VKDacJ" name="precision_v0" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn">
+              pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginVST3Category="Analyzer,Tools" pluginName="Precision" pluginManufacturer="PierreLaur">
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
+      <FILE id="a1YPEO" name="Metronome.cpp" compile="1" resource="0" file="Source/Metronome.cpp"/>
+      <FILE id="gxSLha" name="Metronome.h" compile="0" resource="0" file="Source/Metronome.h"/>
       <FILE id="ncY7Hf" name="PlaybackCursor.cpp" compile="1" resource="0"
             file="Source/PlaybackCursor.cpp"/>
       <FILE id="rP4baJ" name="PlaybackCursor.h" compile="0" resource="0"
