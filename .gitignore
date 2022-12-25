@@ -1,2 +1,18 @@
-Builds/
 JuceLibraryCode/
+
+Builds/*
+!Builds/VisualStudio2022/
+Builds/VisualStudio2022/*
+!Builds/VisualStudio2022/x64/
+Builds/VisualStudio2022/x64/*
+!Builds/VisualStudio2022/x64/Release/
+Builds/VisualStudio2022/x64/Release/*
+
+!Builds/VisualStudio2022/x64/Release/Standalone\ Plugin
+Builds/VisualStudio2022/x64/Release/Standalone\ Plugin/*
+!Builds/VisualStudio2022/x64/Release/Standalone\ Plugin/precision.exe
+
+!Builds/VisualStudio2022/x64/Release/VST3
+Builds/VisualStudio2022/x64/Release/VST3/*
+!Builds/VisualStudio2022/x64/Release/VST3/precision.vst3
+
