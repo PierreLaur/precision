@@ -14,14 +14,13 @@
 
 using namespace juce ;
 
-class BeatScroller  : public juce::Component
+class BeatScroller  : public Component
 {
 public:
-    BeatScroller();
-    ~BeatScroller() override;
+    BeatScroller() {};
 
     void drawScrollerLine(Graphics & g, int level, float x) ;
-    void paint (juce::Graphics&) override;
+    void paint (Graphics&) override;
     void resized() override;
 
 private:

@@ -17,10 +17,11 @@ using namespace juce;
 class Metronome
 {
 public:
-  Metronome();
-  void prepareToPlay(int samplesPerBlock, double sampleRate);
+  Metronome(){};
+
   void count(AudioBuffer<float> &writePointer, int totalNumOutputChannels, int numSamples, double sampleRate);
   void reset();
+
   int numSamplesBeforeBeat{0};
   int samplesPerBeat{0};
 

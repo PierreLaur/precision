@@ -12,16 +12,7 @@
 #include "BeatScroller.h"
 #include "Utils.h"
 
-using namespace juce;
-
 //==============================================================================
-BeatScroller::BeatScroller()
-{
-}
-
-BeatScroller::~BeatScroller()
-{
-}
 
 // draws one of three types of line at the specified location
 // Lower levels are taller (for longer units of time)
@@ -43,7 +34,7 @@ void BeatScroller::drawScrollerLine(Graphics &g, int level, float x)
   }
 }
 
-void BeatScroller::paint(juce::Graphics &g)
+void BeatScroller::paint(Graphics &g)
 {
 
   g.fillAll(juce::Colours::darkgrey); // clear the background

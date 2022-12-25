@@ -20,14 +20,14 @@ using namespace juce;
 //==============================================================================
 /**
  */
-class PrecisionAudioProcessorEditor : public juce::AudioProcessorEditor, public Button::Listener
+class PrecisionAudioProcessorEditor : public AudioProcessorEditor, public Button::Listener
 {
 public:
   PrecisionAudioProcessorEditor(PrecisionAudioProcessor &);
   ~PrecisionAudioProcessorEditor() override;
 
   //==============================================================================
-  void paint(juce::Graphics &) override;
+  void paint(Graphics &) override;
   void resized() override;
 
   void verticalZoom(const MouseWheelDetails wheel);
@@ -40,10 +40,14 @@ public:
   void buttonClicked(Button *button) override;
   void setupButtons();
 
+  void startRecording(GridType grid) ;
+  void stopRecording() ;
+
+
   VerticalPiano topPiano;
   VerticalPiano bottomPiano;
-  MidiGrid topGrid;
-  MidiGrid bottomGrid;
+  MidiGrid topGrid {GridType::Model};
+  MidiGrid bottomGrid{GridType::Student};
   BeatScroller topScroller;
   BeatScroller bottomScroller;
 
@@ -60,21 +64,21 @@ private:
   // access the processor object that created it.
   PrecisionAudioProcessor &audioProcessor;
 
-  juce::TextButton quantizeButton;
-  juce::TextButton topRecordButton;
-  juce::TextButton bottomRecordButton;
-  juce::TextButton topClearButton;
-  juce::TextButton bottomClearButton;
-  juce::TextButton updateButton;
+  TextButton quantizeButton;
+  TextButton topRecordButton;
+  TextButton bottomRecordButton;
+  TextButton topClearButton;
+  TextButton bottomClearButton;
+  TextButton updateButton;
 
-  juce::Label numBarsLabel;
-  juce::Label numBarsInput;
-  juce::Label tempoLabel;
-  juce::Label tempoInput;
+  Label numBarsLabel;
+  Label numBarsInput;
+  Label tempoLabel;
+  Label tempoInput;
 
-  juce::Label precisionAnalytics;
+  Label precisionAnalytics;
 
-  juce::ComboBox quantizationSelector;
+  ComboBox quantizationSelector;
 
   int defaultWidth = 1400;
   int defaultHeight = 700;

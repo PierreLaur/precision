@@ -19,8 +19,7 @@
 class VerticalPiano  : public juce::Component
 {
 public:
-    VerticalPiano();
-    ~VerticalPiano() override;
+    VerticalPiano() {};
 
     void paint (juce::Graphics&) override;
     void resized() override;

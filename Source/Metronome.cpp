@@ -11,15 +11,6 @@
 #include "Metronome.h"
 #include "Utils.h"
 
-Metronome::Metronome()
-{
-}
-
-void Metronome::prepareToPlay(int samplesPerBlock, double sampleRate)
-{
-  samplesPerBeat = beatsToSamples(1.0, sampleRate);
-}
-
 void Metronome::count(AudioBuffer<float> &buffer, int totalNumOutputChannels, int numSamples, double sampleRate)
 {
   if (numSamplesBeforeBeat < numSamples)

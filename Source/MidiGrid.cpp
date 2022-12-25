@@ -15,10 +15,8 @@
 #include "Utils.h"
 #include <map>
 
-using namespace juce;
-
 //==============================================================================
-MidiGrid::MidiGrid()
+MidiGrid::MidiGrid(GridType type) : gridType{type}
 {
   // TODO : check if this is useful
   setLookAndFeel(&lf);
@@ -87,6 +85,16 @@ void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate)
   auto bounds = cursor.getBounds();
   bounds.setX(positionInPixels);
   cursor.setBounds(bounds);
+
+  // delete the first old note found before the cursor
+  for (auto const& [ID, oldNote] : oldNotes) {
+    if (positionInPixels > oldNote->getX()) {
+      deleteMidiNote(ID) ;
+      oldNotes.erase(ID);
+      break;
+    }
+  }
+
 }
 
 void MidiGrid::hideCursor()
@@ -94,6 +102,7 @@ void MidiGrid::hideCursor()
   auto bounds = cursor.getBounds();
   bounds.setX(-5);
   cursor.setBounds(bounds);
+  repaint();
 }
 
 void MidiGrid::setCursorAtZero()
@@ -113,41 +122,39 @@ double getDeviation(Component *note, Component *modelNote)
 
 void MidiGrid::paintOverChildren(Graphics &g)
 {
-  if (isStudent())
+  if (gridType == GridType::Student)
   {
-    // the cursor is a component too, so substract one
-    int numNotes = modelGrid->getNumChildComponents() - 1;
-    if (numNotes > 0)
+    double newAverageAbsoluteDeviationMs = 0.0;
+    double newAverageDeviationMs = 0.0;
+    [[maybe_unused]] double newAverageAbsoluteDeviationToLengthMs = 0.0;
+    [[maybe_unused]] double newAverageDeviationToLengthMs = 0.0;
+    for (auto const &[ID, note] : notesOnGrid)
     {
-      double newAverageAbsoluteDeviationMs = 0.0;
-      double newAverageDeviationMs = 0.0;
-      double newAverageAbsoluteDeviationToLengthMs = 0.0;
-      double newAverageDeviationToLengthMs = 0.0;
-      for (Component *note : getChildren())
-      {
-        // the component with ID "" is the cursor, skip it
-        if (note->getComponentID() == "")
-          continue;
-        auto modelNote = findModelNote(note);
-        g.setColour(Colours::purple);
-        g.setOpacity(0.2f);
-        g.fillRect(modelNote->getBounds());
-        drawNoteAnalytics(note, modelNote, g);
+      auto modelNote = findModelNote(note);
+      g.setColour(Colours::purple);
+      g.setOpacity(0.2f);
+      g.fillRect(modelNote->getBounds());
+      drawNoteAnalytics(note, modelNote, g);
 
-        double deviation = getDeviation(note, modelNote);
-        newAverageDeviationMs += deviation;
-        newAverageAbsoluteDeviationMs += abs(deviation);
-      }
-      repaint(getLocalBounds());
-      averageAbsoluteDeviationMs = newAverageAbsoluteDeviationMs / numNotes;
-      averageDeviationMs = newAverageDeviationMs / numNotes;
+      double deviation = getDeviation(note, modelNote);
+      newAverageDeviationMs += deviation;
+      newAverageAbsoluteDeviationMs += abs(deviation);
     }
+    repaint(getLocalBounds());
+    averageAbsoluteDeviationMs = newAverageAbsoluteDeviationMs / notesOnGrid.size();
+    averageDeviationMs = newAverageDeviationMs / notesOnGrid.size();
   }
 }
 
 void MidiGrid::resized()
 {
   cursor.setSize(1, getHeight());
+}
+
+void MidiGrid::addToGrid(MidiNote *note)
+{
+  notesOnGrid[note->getComponentID()] = note;
+  addAndMakeVisible(*note);
 }
 
 void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double sampleRate)
@@ -175,7 +182,7 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double 
                          (127 - newNote->notePitch) * NOTE_HEIGHT,
                          (int)(newNote->noteLength * BEAT_LENGTH_PIXELS),
                          NOTE_HEIGHT);
-      addAndMakeVisible(*newNote);
+      addToGrid(newNote);
       notesReceived.erase(message->getNoteNumber());
     }
   }
@@ -239,33 +246,31 @@ void MidiGrid::createMidiNote(Point<int> point)
   float start = (float)point.getX() / (float)BEAT_LENGTH_PIXELS;
   start = start - fmod(start, quantizationInBeats);
   int noteY = point.getY() / NOTE_HEIGHT;
-  MidiNote *myNote = new MidiNote(127 - noteY, start, quantizationInBeats, currentNoteID, *this);
 
-  myNote->setBounds(static_cast<int>(myNote->noteStart * BEAT_LENGTH_PIXELS),
+  MidiNote *myNote = new MidiNote(127 - noteY, start, quantizationInBeats, currentNoteID, *this);
+  myNote->setBounds((int)(myNote->noteStart * BEAT_LENGTH_PIXELS),
                     noteY * NOTE_HEIGHT,
-                    static_cast<int>(myNote->noteLength * BEAT_LENGTH_PIXELS),
+                    (int)(myNote->noteLength * BEAT_LENGTH_PIXELS),
                     NOTE_HEIGHT);
-  addAndMakeVisible(*myNote);
-  currentNoteID += 1;
+  addToGrid(myNote);
+  currentNoteID++;
 }
 
 // Delete a note identified by ID
 void MidiGrid::deleteMidiNote(String noteID)
 {
   // TODO : something cleaner (actually delete the note)
+  notesOnGrid.erase(noteID);
   removeChildComponent(getIndexOfChildComponent(findChildWithID(noteID)));
 }
 
 void MidiGrid::clearNotes()
 {
-  // TODO : debug (if many notes, some are not removed)
-  for (Component *note : getChildren())
+  for (auto const &[ID, note] : notesOnGrid)
   {
-    // the component with ID "" is the cursor, skip it
-    if (note->getComponentID() == "")
-      continue;
-    deleteMidiNote(note->getComponentID());
+    removeChildComponent(getIndexOfChildComponent(findChildWithID(ID)));
   }
+  notesOnGrid.clear();
   repaint(getLocalBounds());
 }
 
@@ -275,28 +280,19 @@ void MidiGrid::mouseDoubleClick(const MouseEvent &e)
   createMidiNote(e.getPosition());
 }
 
-bool MidiGrid::isStudent()
-{
-  return modelGrid != nullptr;
-}
-
 void MidiGrid::quantize()
 {
-  for (Component *child : getChildren())
+  for (auto const &[ID, note] : notesOnGrid)
   {
-    // the component with ID "" is the cursor, skip it
-    if (child->getComponentID() == "")
-      continue;
+    float currentStart = (float)(note->getX()) / BEAT_LENGTH_PIXELS;
+    float currentLength = (float)(note->getWidth()) / BEAT_LENGTH_PIXELS;
 
-    float currentStart = (float)(child->getX()) / BEAT_LENGTH_PIXELS;
-    float currentLength = (float)(child->getWidth()) / BEAT_LENGTH_PIXELS;
-
-    Rectangle<int> newBounds = child->getBounds();
+    Rectangle<int> newBounds = note->getBounds();
     newBounds.setX(
         static_cast<int>(std::round(currentStart / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_PIXELS));
     auto quantizedLength = std::round(currentLength / quantizationInBeats) * quantizationInBeats;
     newBounds.setWidth((int)(std::max(quantizedLength, quantizationInBeats) * BEAT_LENGTH_PIXELS));
-    child->setBounds(newBounds);
+    note->setBounds(newBounds);
   }
 }
 
@@ -305,14 +301,11 @@ Component *MidiGrid::findModelNote(Component *note)
 {
   Component *modelNote = nullptr;
   int minDifference = INT_MAX;
-  for (Component *modelGridNote : modelGrid->getChildren())
-  {
-    // the component with ID "0" is the cursor, skip it
-    if (modelGridNote->getComponentID() == "")
-      continue;
 
-    // TODO : add pitch and note length
-    // TODO : better note coupling (don't couple to the same note, etc.)
+  // TODO : add pitch and note length
+  // TODO : better note coupling (don't couple to the same note, etc.)
+  for (auto const &[ID, modelGridNote] : modelGrid->notesOnGrid)
+  {
     int currentDifference = std::abs(modelGridNote->getX() - note->getX());
     if (currentDifference < minDifference)
     {
@@ -320,15 +313,8 @@ Component *MidiGrid::findModelNote(Component *note)
       minDifference = currentDifference;
     }
   }
-  return modelNote;
-}
 
-Rectangle<int> correctPart(Component *note, Component *modelNote)
-{
-  if (note->getY() != modelNote->getY())
-    return Rectangle<int>();
-  else
-    return note->getBounds();
+  return modelNote;
 }
 
 void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g)
@@ -347,7 +333,7 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
     auto correctPart = note->getBounds().getIntersection(modelNote->getBounds());
     g.fillRect(correctPart);
 
-    // outline
+    // outline and arrow
     g.setColour(Colours::black);
     g.drawRect(correctPart);
     g.drawArrow(Line(noteLeft, modelNoteLeft), 4.0f, 9.0f, 9.0f);
@@ -362,4 +348,11 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
       g.drawArrow(Line(noteRight, modelNoteRight), 1.5f, 5.0f, 5.0f);
     }
   }
+}
+
+// notes are marked old when they have been recorded in a previous recording thread
+// this means they can be deleted as new notes are recorded
+void MidiGrid::markNotesAsOld()
+{
+  oldNotes = notesOnGrid;
 }

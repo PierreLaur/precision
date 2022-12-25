@@ -13,7 +13,6 @@
 #include "Utils.h"
 #include "MidiNote.h"
 
-using namespace juce;
 class MidiNote;
 
 NoteBorder::NoteBorder(Component *componentToResize, ComponentBoundsConstrainer *constrainer, MidiNote & parentNote)

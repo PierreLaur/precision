@@ -15,7 +15,6 @@
 #include "Utils.h"
 #include "NoteBorder.h"
 
-using namespace juce;
 class NoteBorder;
 
 MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &grid) : ResizableWindow("noName", Colours::red, false),
@@ -32,7 +31,7 @@ MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &g
     setMouseCursor(MouseCursor::DraggingHandCursor);
     setLookAndFeel(&lf);
 
-    if (parentGrid.isStudent())
+    if (parentGrid.gridType == GridType::Student)
     {
         setBackgroundColour(Colours::darkred);
     }

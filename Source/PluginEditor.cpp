@@ -1,11 +1,3 @@
-/*
-  ==============================================================================
-
-    This file contains the basic framework code for a JUCE plugin editor.
-
-  ==============================================================================
-*/
-
 #pragma once
 
 #include "PluginProcessor.h"
@@ -15,8 +7,6 @@
 #include <filesystem>
 #include <iostream>
 #include <fstream>
-
-using namespace juce;
 
 //==============================================================================
 PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProcessor &p)
@@ -259,6 +249,32 @@ void PrecisionAudioProcessorEditor::quantizationChanged()
   repaint();
 }
 
+void PrecisionAudioProcessorEditor::startRecording(GridType grid)
+{
+  topGrid.setCursorAtZero();
+  bottomGrid.setCursorAtZero();
+  audioProcessor.metronome.reset();
+  audioProcessor.blockStartTimesteps = 0;
+  switch (grid)
+  {
+  case (GridType::Model):
+    audioProcessor.modelRecording = true;
+    break;
+  case (GridType::Student):
+    audioProcessor.studentRecording = true;
+    bottomGrid.markNotesAsOld();
+    break;
+  }
+}
+
+void PrecisionAudioProcessorEditor::stopRecording()
+{
+  topGrid.hideCursor();
+  bottomGrid.hideCursor();
+  audioProcessor.studentRecording = false;
+  audioProcessor.modelRecording = false;
+}
+
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 {
 
@@ -266,38 +282,49 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
     topGrid.quantize();
   if (button == &topRecordButton)
   {
-    if (audioProcessor.modelRecording || audioProcessor.studentRecording)
+    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
     {
-      topGrid.hideCursor();
-      bottomGrid.hideCursor();
+      print("Error : two grids recording at the same time");
+      stopRecording();
+      startRecording(GridType::Model);
+    }
+    else if (audioProcessor.modelRecording)
+    {
+      stopRecording();
+    }
+    else if (audioProcessor.studentRecording)
+    {
+      stopRecording();
+      startRecording(GridType::Model);
     }
     else
     {
-      topGrid.setCursorAtZero();
-      bottomGrid.setCursorAtZero();
-      audioProcessor.metronome.reset();
-      audioProcessor.blockStartTimesteps = 0;
+      startRecording(GridType::Model);
     }
-    audioProcessor.modelRecording = !audioProcessor.modelRecording;
-    audioProcessor.studentRecording = false;
   }
   if (button == &bottomRecordButton)
   {
-    if (audioProcessor.modelRecording || audioProcessor.studentRecording)
+    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
     {
-      topGrid.hideCursor();
-      bottomGrid.hideCursor();
+      print("Error : two grids recording at the same time");
+      stopRecording();
+      startRecording(GridType::Student);
+    }
+    else if (audioProcessor.studentRecording)
+    {
+      stopRecording();
+    }
+    else if (audioProcessor.modelRecording)
+    {
+      stopRecording();
+      startRecording(GridType::Student);
     }
     else
     {
-      topGrid.setCursorAtZero();
-      bottomGrid.setCursorAtZero();
-      audioProcessor.metronome.reset();
-      audioProcessor.blockStartTimesteps = 0;
+      startRecording(GridType::Student);
     }
-    audioProcessor.studentRecording = !audioProcessor.studentRecording;
-    audioProcessor.modelRecording = false;
   }
+  // TODO : update analytics on grid repaint (make it a separate component & add a reference to it in midigrid)
   if (button == &updateButton)
   {
     precisionAnalytics.setText(
@@ -342,6 +369,7 @@ void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
 }
 
 void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel)
+// TODO : zooming/unzooming with touchpad
 {
   if (wheel.deltaY > 0)
   {

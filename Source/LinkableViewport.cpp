@@ -11,7 +11,6 @@
 #include "LinkableViewport.h"
 #include "PluginEditor.h"
 
-using namespace juce;
 class PrecisionAudioProcessorEditor;
 
 LinkableViewport::LinkableViewport(PrecisionAudioProcessorEditor &editor) : Viewport::Viewport("noName"), editor{editor}
@@ -49,7 +48,7 @@ bool LinkableViewport::useMouseWheelMoveIfNeeded(const MouseEvent &e, const Mous
   }
 }
 
-// Add a viewport to scroll when this one is scrolled
+// Adds a viewport to scroll when this one is scrolled
 void LinkableViewport::linkViewport(Viewport *view)
 {
   auto it = linkedViewports.begin();

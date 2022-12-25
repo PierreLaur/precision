@@ -12,13 +12,6 @@
 #include "VerticalPiano.h"
 
 //==============================================================================
-VerticalPiano::VerticalPiano()
-{
-}
-
-VerticalPiano::~VerticalPiano()
-{
-}
 
 void VerticalPiano::paint(juce::Graphics &g)
 {

@@ -11,8 +11,6 @@
 #include <JuceHeader.h>
 #include "PlaybackCursor.h"
 
-using namespace juce ;
-
 //==============================================================================
 PlaybackCursor::PlaybackCursor()
 {
