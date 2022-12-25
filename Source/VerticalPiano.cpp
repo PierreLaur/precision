@@ -27,16 +27,14 @@ void VerticalPiano::paint(juce::Graphics &g)
     if (i % 12 == 1 || i % 12 == 4 || i % 12 == 6 || i % 12 == 9 || i % 12 == 11)
     {
       g.fillRect(rect);
-    } else if (i % 12 == 7) {
-      g.drawText("C"+std::to_string(8-i/12), rect, Justification::centred) ;
+    }
+    else if (i % 12 == 7)
+    {
+      g.drawText("C" + std::to_string(8 - i / 12), rect, Justification::centred);
     }
     g.drawRect(rect);
   }
 
   // outline
   g.drawRect(getLocalBounds(), 2);
-}
-
-void VerticalPiano::resized()
-{
 }

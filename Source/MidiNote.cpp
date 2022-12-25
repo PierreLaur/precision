@@ -46,7 +46,7 @@ MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &g
 
 MidiNote::~MidiNote()
 {
-    // TODO
+    // TODO : handle proper object destruction
 }
 
 void MidiNote::paint(Graphics &g)

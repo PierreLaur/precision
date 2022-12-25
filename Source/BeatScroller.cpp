@@ -49,9 +49,10 @@ void BeatScroller::paint(Graphics &g)
       drawScrollerLine(g, 1, (float)i);
 
       // TODO : handle different time signatures
-      String time = String(1+(i/(BEAT_LENGTH_PIXELS*4))) ;
-      int beat = 1 + (i / BEAT_LENGTH_PIXELS % 4) ;
-      if (beat != 1) time += "." + String(beat) ;
+      String time = String(1 + (i / (BEAT_LENGTH_PIXELS * 4)));
+      int beat = 1 + (i / BEAT_LENGTH_PIXELS % 4);
+      if (beat != 1)
+        time += "." + String(beat);
 
       g.drawText(time,
                  Rectangle(

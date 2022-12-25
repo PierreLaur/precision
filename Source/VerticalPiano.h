@@ -15,15 +15,14 @@
 
 //==============================================================================
 /*
-*/
-class VerticalPiano  : public juce::Component
+ */
+class VerticalPiano : public juce::Component
 {
 public:
-    VerticalPiano() {};
+  VerticalPiano(){};
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
+  void paint(juce::Graphics &) override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (VerticalPiano)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VerticalPiano)
 };

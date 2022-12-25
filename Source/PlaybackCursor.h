@@ -12,20 +12,20 @@
 
 #include <JuceHeader.h>
 
-using namespace juce ;
+using namespace juce;
 
 //==============================================================================
 /*
-*/
-class PlaybackCursor  : public juce::Component
+ */
+class PlaybackCursor : public juce::Component
 {
 public:
-    PlaybackCursor();
-    ~PlaybackCursor() override;
+  PlaybackCursor();
+  ~PlaybackCursor() override;
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
+  void paint(juce::Graphics &) override;
+  void resized() override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaybackCursor)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaybackCursor)
 };

@@ -13,20 +13,19 @@
 #include <JuceHeader.h>
 #include "MidiNote.h"
 
-using namespace juce ;
-class MidiNote ;
+using namespace juce;
+class MidiNote;
 
-
-class NoteBorder  : public ResizableBorderComponent
+class NoteBorder : public ResizableBorderComponent
 {
 public:
-    NoteBorder (Component* componentToResize,
-                              ComponentBoundsConstrainer* constrainer, MidiNote & parentNote);
-    void setBorderThickness (BorderSize<int> newBorderSize) ;
-    void mouseDrag (const MouseEvent& e) ;
-    bool onlySides = true ;
-    MidiNote & parentNote ; 
-private:
+  NoteBorder(Component *componentToResize,
+             ComponentBoundsConstrainer *constrainer, MidiNote &parentNote);
+  void setBorderThickness(BorderSize<int> newBorderSize);
+  void mouseDrag(const MouseEvent &e);
+  bool onlySides = true;
+  MidiNote &parentNote;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (NoteBorder)
+private:
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(NoteBorder)
 };

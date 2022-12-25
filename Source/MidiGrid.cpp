@@ -16,9 +16,9 @@
 #include <map>
 
 //==============================================================================
-MidiGrid::MidiGrid(GridType type) : gridType{type}
+MidiGrid::MidiGrid(GridType type, PrecisionAnalytics &analytics) : gridType{type}, analytics{analytics}
 {
-  // TODO : check if this is useful
+  // TODO: check if this is useful
   setLookAndFeel(&lf);
 
   addAndMakeVisible(cursor);
@@ -28,7 +28,7 @@ MidiGrid::MidiGrid(GridType type) : gridType{type}
 
 MidiGrid::~MidiGrid()
 {
-  // TODO : handle proper object destruction for everything
+  // TODO: handle proper object destruction for everything
 }
 
 void MidiGrid::paint(Graphics &g)
@@ -87,14 +87,15 @@ void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate)
   cursor.setBounds(bounds);
 
   // delete the first old note found before the cursor
-  for (auto const& [ID, oldNote] : oldNotes) {
-    if (positionInPixels > oldNote->getX()) {
-      deleteMidiNote(ID) ;
+  for (auto const &[ID, oldNote] : oldNotes)
+  {
+    if (positionInPixels > oldNote->getX())
+    {
+      deleteMidiNote(ID);
       oldNotes.erase(ID);
       break;
     }
   }
-
 }
 
 void MidiGrid::hideCursor()
@@ -120,6 +121,12 @@ double getDeviation(Component *note, Component *modelNote)
   return deviationMs;
 }
 
+void MidiGrid::updateAnalytics(double newAverageAbsoluteDeviationMs, double newAverageDeviationMs,
+                               double newAverageAbsoluteDeviationToLengthMs, double newAverageDeviationToLengthMs)
+{
+  analytics.update(newAverageAbsoluteDeviationMs, newAverageDeviationMs, newAverageAbsoluteDeviationToLengthMs, newAverageDeviationToLengthMs);
+}
+
 void MidiGrid::paintOverChildren(Graphics &g)
 {
   if (gridType == GridType::Student)
@@ -128,21 +135,25 @@ void MidiGrid::paintOverChildren(Graphics &g)
     double newAverageDeviationMs = 0.0;
     [[maybe_unused]] double newAverageAbsoluteDeviationToLengthMs = 0.0;
     [[maybe_unused]] double newAverageDeviationToLengthMs = 0.0;
+
     for (auto const &[ID, note] : notesOnGrid)
     {
       auto modelNote = findModelNote(note);
-      g.setColour(Colours::purple);
-      g.setOpacity(0.2f);
-      g.fillRect(modelNote->getBounds());
-      drawNoteAnalytics(note, modelNote, g);
 
-      double deviation = getDeviation(note, modelNote);
-      newAverageDeviationMs += deviation;
-      newAverageAbsoluteDeviationMs += abs(deviation);
+      if (modelNote != nullptr)
+      {
+        g.setColour(Colours::purple);
+        g.setOpacity(0.2f);
+        g.fillRect(modelNote->getBounds());
+        drawNoteAnalytics(note, modelNote, g);
+        double deviation = getDeviation(note, modelNote);
+        newAverageDeviationMs += deviation;
+        newAverageAbsoluteDeviationMs += abs(deviation);
+      }
     }
     repaint(getLocalBounds());
-    averageAbsoluteDeviationMs = newAverageAbsoluteDeviationMs / notesOnGrid.size();
-    averageDeviationMs = newAverageDeviationMs / notesOnGrid.size();
+
+    updateAnalytics(newAverageAbsoluteDeviationMs / notesOnGrid.size(), newAverageDeviationMs / notesOnGrid.size(), 0.0, 0.0);
   }
 }
 
@@ -159,8 +170,12 @@ void MidiGrid::addToGrid(MidiNote *note)
 
 void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double sampleRate)
 {
-  // TODO : TEMPO
   int timestepsPerBeat = beatsToSamples(1.0, sampleRate);
+  int maxSamples = numBars * timeSigNumerator * timestepsPerBeat;
+  if (timestep > maxSamples)
+    return;
+  // TODO: add automatic note off when recording stops
+
   if (message->isNoteOn())
   {
     notesReceived[message->getNoteNumber()] = new MidiNote(
@@ -186,9 +201,10 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double 
       notesReceived.erase(message->getNoteNumber());
     }
   }
+
   else if (message->isTempoMetaEvent())
   {
-    // TODO
+    // TODO : change tempo according to the message received
     std::cout << "Tempo meta event : " << message->getTempoSecondsPerQuarterNote() << std::endl;
   }
   else if (message->isKeySignatureMetaEvent())
@@ -259,7 +275,6 @@ void MidiGrid::createMidiNote(Point<int> point)
 // Delete a note identified by ID
 void MidiGrid::deleteMidiNote(String noteID)
 {
-  // TODO : something cleaner (actually delete the note)
   notesOnGrid.erase(noteID);
   removeChildComponent(getIndexOfChildComponent(findChildWithID(noteID)));
 }
@@ -302,8 +317,7 @@ Component *MidiGrid::findModelNote(Component *note)
   Component *modelNote = nullptr;
   int minDifference = INT_MAX;
 
-  // TODO : add pitch and note length
-  // TODO : better note coupling (don't couple to the same note, etc.)
+  // TODO: better note coupling (don't couple to the same note, add pitch & length etc.)
   for (auto const &[ID, modelGridNote] : modelGrid->notesOnGrid)
   {
     int currentDifference = std::abs(modelGridNote->getX() - note->getX());
@@ -326,27 +340,24 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
   auto modelNoteRight = Point(static_cast<float>(modelNote->getRight()), static_cast<float>(modelNote->getBounds().getCentreY()));
 
   // if (note->getX() - modelNote->getX() > 0)
-  if (modelNote != nullptr)
+  // print the correct part in green
+  g.setColour(Colours::green);
+  auto correctPart = note->getBounds().getIntersection(modelNote->getBounds());
+  g.fillRect(correctPart);
+
+  // outline and arrow
+  g.setColour(Colours::black);
+  g.drawRect(correctPart);
+  g.drawArrow(Line(noteLeft, modelNoteLeft), 4.0f, 9.0f, 9.0f);
+
+  g.setColour(Colours::darkred);
+  g.drawArrow(Line(noteLeft, modelNoteLeft), 3.0f, 8.0f, 8.0f);
+
+  if (analyzeNoteLengths)
   {
-    // print the correct part in green
-    g.setColour(Colours::green);
-    auto correctPart = note->getBounds().getIntersection(modelNote->getBounds());
-    g.fillRect(correctPart);
-
-    // outline and arrow
-    g.setColour(Colours::black);
-    g.drawRect(correctPart);
-    g.drawArrow(Line(noteLeft, modelNoteLeft), 4.0f, 9.0f, 9.0f);
-
-    g.setColour(Colours::darkred);
-    g.drawArrow(Line(noteLeft, modelNoteLeft), 3.0f, 8.0f, 8.0f);
-
-    if (analyzeNoteLengths)
-    {
-      g.setColour(Colours::darkblue);
-      g.setOpacity(0.4f);
-      g.drawArrow(Line(noteRight, modelNoteRight), 1.5f, 5.0f, 5.0f);
-    }
+    g.setColour(Colours::darkblue);
+    g.setOpacity(0.4f);
+    g.drawArrow(Line(noteRight, modelNoteRight), 1.5f, 5.0f, 5.0f);
   }
 }
 

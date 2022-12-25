@@ -17,7 +17,7 @@
 
 using namespace juce;
 class MidiGrid;
-class NoteBorder ;
+class NoteBorder;
 
 class MidiNote : public ResizableWindow
 {
@@ -37,9 +37,8 @@ public:
   void mouseUp(const MouseEvent &) override;
   void mouseDoubleClick(const MouseEvent &) override;
 
-  void setResizable (const bool shouldBeResizable) ;
+  void setResizable(const bool shouldBeResizable);
   std::unique_ptr<NoteBorder> noteBorder;
-
 
 private:
   ComponentBoundsConstrainer noteConstrainer;

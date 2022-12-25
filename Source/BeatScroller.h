@@ -12,17 +12,17 @@
 
 #include <JuceHeader.h>
 
-using namespace juce ;
+using namespace juce;
 
-class BeatScroller  : public Component
+class BeatScroller : public Component
 {
 public:
-    BeatScroller() {};
+  BeatScroller(){};
 
-    void drawScrollerLine(Graphics & g, int level, float x) ;
-    void paint (Graphics&) override;
-    void resized() override;
+  void drawScrollerLine(Graphics &g, int level, float x);
+  void paint(Graphics &) override;
+  void resized() override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatScroller)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BeatScroller)
 };

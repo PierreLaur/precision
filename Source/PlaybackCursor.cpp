@@ -14,22 +14,19 @@
 //==============================================================================
 PlaybackCursor::PlaybackCursor()
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
-
+  // In your constructor, you should add any child components, and
+  // initialise any special settings that your component needs.
 }
 
 PlaybackCursor::~PlaybackCursor()
 {
 }
 
-void PlaybackCursor::paint (juce::Graphics& g)
+void PlaybackCursor::paint(juce::Graphics &g)
 {
-    g.fillAll (Colours::black);   // clear the background
-
+  g.fillAll(Colours::black); // clear the background
 }
 
 void PlaybackCursor::resized()
 {
-
 }

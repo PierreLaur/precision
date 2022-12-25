@@ -67,7 +67,7 @@ public:
   bool modelRecording = false;
 
   int blockStartTimesteps = 0;
-  Metronome metronome ;
+  Metronome metronome;
 
 private:
   //==============================================================================

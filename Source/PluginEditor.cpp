@@ -140,11 +140,6 @@ void PrecisionAudioProcessorEditor::setupButtons()
   bottomClearButton.addListener(this);
   addAndMakeVisible(bottomClearButton);
 
-  updateButton.setColour(TextButton::buttonColourId, Colours::purple);
-  updateButton.setButtonText("Update");
-  updateButton.addListener(this);
-  addAndMakeVisible(updateButton);
-
   addAndMakeVisible(numBarsLabel);
   numBarsLabel.setText("Bars : ", dontSendNotification);
   numBarsLabel.setJustificationType(Justification::centred);
@@ -154,14 +149,6 @@ void PrecisionAudioProcessorEditor::setupButtons()
   tempoLabel.setJustificationType(Justification::centred);
 
   addAndMakeVisible(precisionAnalytics);
-  precisionAnalytics.setText(
-      "Precision Analytics : \n\n\n\
-    Average Absolute Deviation : " +
-          String(bottomGrid.averageAbsoluteDeviationMs) + " ms\n\
-    Average Deviation : " +
-          String(bottomGrid.averageDeviationMs) + " ms",
-      dontSendNotification);
-  precisionAnalytics.setJustificationType(Justification::centredTop);
 
   addAndMakeVisible(numBarsInput);
   numBarsInput.setText(String(numBars), dontSendNotification);
@@ -201,16 +188,6 @@ void PrecisionAudioProcessorEditor::setupButtons()
     if (inputInt != -1)
     {
       tempo = (float)inputInt;
-      print(tempo);
-      // minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / (BEAT_LENGTH_PIXELS * numBars * timeSigNumerator);
-      // widthMultiplier = std::max(widthMultiplier * 0.8f, minWidthMultiplier);
-
-      // topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-      // bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-      // topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-      // bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-
-      // setTransforms();
     }
     else
     {
@@ -277,7 +254,6 @@ void PrecisionAudioProcessorEditor::stopRecording()
 
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 {
-
   if (button == &quantizeButton)
     topGrid.quantize();
   if (button == &topRecordButton)
@@ -325,16 +301,6 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
     }
   }
   // TODO : update analytics on grid repaint (make it a separate component & add a reference to it in midigrid)
-  if (button == &updateButton)
-  {
-    precisionAnalytics.setText(
-        "Precision Analytics : \n\n\n\
-    Average Absolute Deviation : " +
-            String(bottomGrid.averageAbsoluteDeviationMs) + " ms\n\
-    Average Deviation : " +
-            String(bottomGrid.averageDeviationMs) + " ms",
-        dontSendNotification);
-  }
   if (button == &topClearButton)
   {
     topGrid.clearNotes();
@@ -384,7 +350,8 @@ void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel
 
 void PrecisionAudioProcessorEditor::automaticZoom()
 {
-  // TODO
+  // TODO : adapt zoom to the notes on the grid
+  // TODO : follow the cursor
 }
 
 void PrecisionAudioProcessorEditor::resized()
@@ -431,7 +398,7 @@ void PrecisionAudioProcessorEditor::resized()
 
   setTransforms();
 
-  // TODO : choose scrollbars on or off
+  // TODO : fix scrollbar weirdly disappearing
   minHeightMultiplier = static_cast<float>(topGridView.getHeight() - topGridView.getHorizontalScrollBar().getHeight()) / topGrid.getHeight();
   minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / topGrid.getWidth();
 
@@ -440,7 +407,7 @@ void PrecisionAudioProcessorEditor::resized()
   tempoLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 80, 50, 20);
   tempoInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 80, 30, 20);
 
-  precisionAnalytics.setBounds(bottomGridView.getRight() + 10, bottomGridView.getBounds().getY(),
+  precisionAnalytics.setBounds(bottomGridView.getRight() + 10, bottomGridView.getBounds().getY() + 10,
                                getWidth() - bottomGridView.getRight() - 20, bottomGridView.getHeight() - 35);
 
   quantizeButton.setBounds(
@@ -470,12 +437,6 @@ void PrecisionAudioProcessorEditor::resized()
   bottomClearButton.setBounds(
       bottomScrollerView.getRight() + 10,
       bottomScrollerView.getY() + 30,
-      80,
-      25);
-
-  updateButton.setBounds(
-      precisionAnalytics.getBounds().getCentreX() - 40,
-      precisionAnalytics.getBottom() + 10,
       80,
       25);
 

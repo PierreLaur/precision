@@ -177,14 +177,6 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
         }
     }
 
-    // update the cursor during recording
-    if (studentRecording || modelRecording)
-    {
-        editor->topGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
-        editor->bottomGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
-        blockStartTimesteps += numSamples;
-    }
-
     // end of the recording zone
     int maxSamples = numBars * timeSigNumerator * beatsToSamples(1.0, sampleRate);
     if (blockStartTimesteps > maxSamples)
@@ -193,7 +185,6 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
         {
             editor->stopRecording();
             // LOOP
-            print("Looping") ;
             editor->startRecording(GridType::Student);
         }
         else
@@ -201,7 +192,15 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
             editor->stopRecording();
         }
         // blockStartTimesteps -= maxSamples;
-        // TODO : fix time cut when looping
+        // TODO : fix little time cut when looping
+    }
+
+    // update the cursor during recording
+    if (studentRecording || modelRecording)
+    {
+        editor->topGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
+        editor->bottomGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
+        blockStartTimesteps += numSamples;
     }
 }
 
@@ -229,7 +228,6 @@ void PrecisionAudioProcessor::setStateInformation([[maybe_unused]] const void *d
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-
 }
 
 //==============================================================================

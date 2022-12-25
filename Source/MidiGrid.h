@@ -14,18 +14,23 @@
 #include "MidiNote.h"
 #include "PrecisionLookAndFeel.h"
 #include "PlaybackCursor.h"
+#include "PrecisionAnalytics.h"
 #include "Utils.h"
 #include <map>
 
 using namespace juce;
 class MidiNote;
 
-enum class GridType {Student, Model} ;
+enum class GridType
+{
+  Student,
+  Model
+};
 
 class MidiGrid : public Component
 {
 public:
-  MidiGrid(GridType type);
+  MidiGrid(GridType type, PrecisionAnalytics &analytics);
   ~MidiGrid() override;
   void paint(juce::Graphics &) override;
   void paintOverChildren(juce::Graphics &) override;
@@ -37,8 +42,10 @@ public:
 
   void mouseDoubleClick(const MouseEvent &) override;
   void createMidiNote(Point<int> point);
-  void addToGrid(MidiNote * note) ;
+  void addToGrid(MidiNote *note);
 
+  void updateAnalytics(double newAverageAbsoluteDeviationMs, double newAverageDeviationMs,
+                       double newAverageAbsoluteDeviationToLengthMs, double newAverageDeviationToLengthMs);
 
   void deleteMidiNote(String noteID);
   void clearNotes();
@@ -51,7 +58,7 @@ public:
   void hideCursor();
   void setCursorAtZero();
 
-  void markNotesAsOld() ;
+  void markNotesAsOld();
 
   int currentNoteID = 1;
 
@@ -59,14 +66,11 @@ public:
   std::map<String, MidiNote *> notesOnGrid;
   std::map<String, MidiNote *> oldNotes;
 
-  GridType gridType ;
-  MidiGrid *modelGrid = nullptr ;
+  GridType gridType;
+  MidiGrid *modelGrid = nullptr;
 
   bool analyzeNoteLengths = false;
-  double averageAbsoluteDeviationMs = 0.0;
-  double averageDeviationMs = 0.0;
-  double averageAbsoluteDeviationToLengthMs = 0.0;
-  double averageDeviationToLengthMs = 0.0;
+  PrecisionAnalytics &analytics;
 
   PlaybackCursor cursor;
 

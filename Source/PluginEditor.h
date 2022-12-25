@@ -14,6 +14,7 @@
 #include "VerticalPiano.h"
 #include "LinkableViewport.h"
 #include "BeatScroller.h"
+#include "PrecisionAnalytics.h"
 
 using namespace juce;
 
@@ -40,17 +41,18 @@ public:
   void buttonClicked(Button *button) override;
   void setupButtons();
 
-  void startRecording(GridType grid) ;
-  void stopRecording() ;
-
+  void startRecording(GridType grid);
+  void stopRecording();
 
   VerticalPiano topPiano;
   VerticalPiano bottomPiano;
-  MidiGrid topGrid {GridType::Model};
-  MidiGrid bottomGrid{GridType::Student};
+  PrecisionAnalytics precisionAnalytics;
+  MidiGrid topGrid{GridType::Model, precisionAnalytics};
+  MidiGrid bottomGrid{GridType::Student, precisionAnalytics};
   BeatScroller topScroller;
   BeatScroller bottomScroller;
 
+  // TODO : check which pointers i can replace with references
   LinkableViewport topGridView = LinkableViewport(*this);
   LinkableViewport topPianoView = LinkableViewport(*this);
   LinkableViewport topScrollerView = LinkableViewport(*this);
@@ -69,14 +71,11 @@ private:
   TextButton bottomRecordButton;
   TextButton topClearButton;
   TextButton bottomClearButton;
-  TextButton updateButton;
 
   Label numBarsLabel;
   Label numBarsInput;
   Label tempoLabel;
   Label tempoInput;
-
-  Label precisionAnalytics;
 
   ComboBox quantizationSelector;
 

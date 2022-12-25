@@ -15,7 +15,7 @@
 
 class MidiNote;
 
-NoteBorder::NoteBorder(Component *componentToResize, ComponentBoundsConstrainer *constrainer, MidiNote & parentNote)
+NoteBorder::NoteBorder(Component *componentToResize, ComponentBoundsConstrainer *constrainer, MidiNote &parentNote)
     : ResizableBorderComponent(componentToResize, constrainer), parentNote{parentNote}
 {
 }
