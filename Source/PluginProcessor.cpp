@@ -132,6 +132,13 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
     double sampleRate = getSampleRate();
     int numSamples = buffer.getNumSamples();
 
+    // SYNC WITH HOST
+    if (auto *hostPlayHead = getPlayHead())
+    {
+        updatePlayHeadInfo(hostPlayHead->getPosition());
+        // TODO: playhead is also found in standalone mode, deal with it
+    }
+
     // AUDIO
     {
         ScopedNoDenormals noDenormals;
@@ -156,52 +163,60 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
 
         if (studentRecording || modelRecording)
         {
-            metronome.count(buffer, totalNumOutputChannels, numSamples, sampleRate);
+            // int n = metronome.count(buffer, totalNumOutputChannels, blockStartTimesteps, numSamples, sampleRate);
+            // if (n != 0)
+            // {
+            //     std::cout << "Clicked at" << samplesToBeats(blockStartTimesteps + n, sampleRate) << std::endl;
+            // }
         }
     }
 
     // MIDI
     {
-        for (const auto metadata : midiMessages)
-        {
-            int timestep = metadata.samplePosition;
-            auto message = metadata.getMessage();
-            if (studentRecording)
+
+        double maxRelativePpqPosition = numBars * timeSigNumerator;
+        double relativePpqPosition = ppqPosition - ppqRecordingStart;
+        if ((studentRecording || modelRecording) && relativePpqPosition >= 0) {
+            for (const auto metadata : midiMessages)
             {
-                editor->bottomGrid.processMidiMessage(&message, blockStartTimesteps + timestep, sampleRate);
+                double messageRelativePpqPosition = relativePpqPosition + samplesToBeats(metadata.samplePosition, sampleRate);
+                auto message = metadata.getMessage();
+                if (studentRecording)
+                {
+                    editor->bottomGrid.processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
+                }
+                if (modelRecording)
+                {
+                    std::cout << "received midi at" << messageRelativePpqPosition << std::endl;
+                    myMessage = String(messageRelativePpqPosition);
+                    editor->topGrid.processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
+                }
             }
-            if (modelRecording)
+
+            // end of the recording zone
+            if (relativePpqPosition > maxRelativePpqPosition)
             {
-                editor->topGrid.processMidiMessage(&message, blockStartTimesteps + timestep, sampleRate);
+                if (studentRecording)
+                {
+                    editor->stopRecording();
+                    // LOOP
+                    editor->startRecording(GridType::Student);
+                }
+                else
+                {
+                    editor->stopRecording();
+                }
+            }
+
+            // update the cursor during recording
+            if (studentRecording || modelRecording)
+            {
+                editor->topGrid.setCursorAtPpqPosition(relativePpqPosition);
+                editor->bottomGrid.setCursorAtPpqPosition(relativePpqPosition);
             }
         }
     }
 
-    // end of the recording zone
-    int maxSamples = numBars * timeSigNumerator * beatsToSamples(1.0, sampleRate);
-    if (blockStartTimesteps > maxSamples)
-    {
-        if (studentRecording)
-        {
-            editor->stopRecording();
-            // LOOP
-            editor->startRecording(GridType::Student);
-        }
-        else
-        {
-            editor->stopRecording();
-        }
-        // blockStartTimesteps -= maxSamples;
-        // TODO : fix little time cut when looping
-    }
-
-    // update the cursor during recording
-    if (studentRecording || modelRecording)
-    {
-        editor->topGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
-        editor->bottomGrid.setCursorAtTimestep(blockStartTimesteps, sampleRate);
-        blockStartTimesteps += numSamples;
-    }
 }
 
 //==============================================================================

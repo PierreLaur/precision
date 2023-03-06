@@ -17,8 +17,8 @@
 
 class NoteBorder;
 
-MidiNote::MidiNote(int pitch, float start, float length, int noteID, MidiGrid &grid) : ResizableWindow("noName", Colours::red, false),
-                                                                                       notePitch{pitch}, noteStart{start}, noteLength{length}, parentGrid{grid}
+MidiNote::MidiNote(int pitch, double ppqStart, double ppqLength, int noteID, MidiGrid &grid) : ResizableWindow("noName", Colours::red, false),
+                                                                                       notePitch{pitch}, noteStart{ppqStart}, noteLength{ppqLength}, parentGrid{grid}
 {
     setComponentID(String(noteID));
 

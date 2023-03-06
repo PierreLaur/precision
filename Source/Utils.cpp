@@ -12,11 +12,42 @@
 #include "Utils.h"
 using namespace juce;
 
-float quantizationInBeats = 1.0;
+// PlayHead information from host
+double bpm = 120.0;
 int timeSigNumerator = 4;
 int timeSigDenominator = 4;
+int timeInSamples = 0;
+double timeInSeconds = 0.0;
+double ppqPosition = 0.0;
+double ppqPositionOfLastBarStart = 0.0;
+
+int numPrecountBeats = 0;
+
+String myMessage = "no";
+
 int numBars = 8;
-double tempo = 120.0;
+float quantizationInBeats = 1.0;
+
+void updatePlayHeadInfo(Optional<AudioPlayHead::PositionInfo> optInfo)
+{
+  // TODO : check optional
+  if (!optInfo.hasValue())
+    return;
+  auto info = *optInfo;
+
+  if (info.getBpm().hasValue()) bpm = *info.getBpm();
+  
+  if (info.getTimeSignature().hasValue()) {
+    auto timeSig = *info.getTimeSignature();
+    timeSigNumerator = timeSig.numerator;
+    timeSigDenominator = timeSig.denominator;
+  }
+
+  if (info.getTimeInSamples().hasValue()) timeInSamples = (int)*info.getTimeInSamples();
+  if (info.getTimeInSeconds().hasValue()) timeInSeconds = *info.getTimeInSeconds();
+  if (info.getPpqPosition().hasValue()) ppqPosition = *info.getPpqPosition();
+  if (info.getPpqPositionOfLastBarStart().hasValue()) ppqPositionOfLastBarStart = *info.getPpqPositionOfLastBarStart();
+}
 
 double samplesToSeconds(int samples, double sampleRate)
 {
@@ -30,7 +61,7 @@ int secondsToSamples(float seconds, double sampleRate)
 
 double samplesToBeats(int samples, double sampleRate)
 {
-  double bps = tempo / 60.0;
+  double bps = bpm / 60.0;
   double seconds = samples / sampleRate;
   double beats = seconds * bps;
   return beats;
@@ -38,7 +69,7 @@ double samplesToBeats(int samples, double sampleRate)
 
 int beatsToSamples(double beats, double sampleRate)
 {
-  double bps = tempo / 60.0;
+  double bps = bpm / 60.0;
   double seconds = beats / bps;
   int samples = (int)(seconds * sampleRate);
   return samples;

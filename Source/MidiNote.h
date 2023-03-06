@@ -22,13 +22,13 @@ class NoteBorder;
 class MidiNote : public ResizableWindow
 {
 public:
-  MidiNote(int pitch, float noteStart, float noteLength, int noteID, MidiGrid &grid);
+  MidiNote(int pitch, double noteStart, double noteLength, int noteID, MidiGrid &grid);
   ~MidiNote();
   void paint(Graphics &g) override;
 
   int notePitch;
-  float noteStart;
-  float noteLength;
+  double noteStart;
+  double noteLength;
 
   void updateNote();
   void updateConstraints();

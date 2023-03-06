@@ -11,26 +11,22 @@
 #include "Metronome.h"
 #include "Utils.h"
 
-void Metronome::count(AudioBuffer<float> &buffer, int totalNumOutputChannels, int numSamples, double sampleRate)
+int Metronome::count(AudioBuffer<float> &buffer, int totalNumOutputChannels, int blockStart, int numNewSamples, double sampleRate)
 {
-  if (numSamplesBeforeBeat < numSamples)
-  {
+  samplesPerBeat = beatsToSamples(1.0, sampleRate);
+  int samplesInBeat = blockStart % samplesPerBeat;
+  int samplesBeforeBeat = samplesPerBeat - samplesInBeat;
 
+  if (samplesInBeat == 0 || numNewSamples >= samplesBeforeBeat)
+  {
+    // Click
     for (int channel = 0; channel < totalNumOutputChannels; ++channel)
     {
       auto writePointer = buffer.getWritePointer(channel);
-      writePointer[numSamplesBeforeBeat] = 4.0f;
+      writePointer[samplesBeforeBeat] = 4.0f;
     }
-    samplesPerBeat = beatsToSamples(1.0, sampleRate);
-    numSamplesBeforeBeat += samplesPerBeat;
+    return samplesBeforeBeat;
   }
   else
-  {
-    numSamplesBeforeBeat -= numSamples;
-  }
-}
-
-void Metronome::reset()
-{
-  numSamplesBeforeBeat = 0;
+    return 0;
 }

@@ -15,6 +15,7 @@
 #include "LinkableViewport.h"
 #include "BeatScroller.h"
 #include "PrecisionAnalytics.h"
+#include "TransportPanel.h"
 
 using namespace juce;
 
@@ -52,6 +53,9 @@ public:
   BeatScroller topScroller;
   BeatScroller bottomScroller;
 
+  TransportPanel transportPanel;
+  double ha = 2.0;
+
   // TODO : check which pointers i can replace with references
   LinkableViewport topGridView = LinkableViewport(*this);
   LinkableViewport topPianoView = LinkableViewport(*this);
@@ -61,10 +65,10 @@ public:
   LinkableViewport bottomPianoView = LinkableViewport(*this);
   LinkableViewport bottomScrollerView = LinkableViewport(*this);
 
+  PrecisionAudioProcessor &audioProcessor;
 private:
   // This reference is provided as a quick way for your editor to
   // access the processor object that created it.
-  PrecisionAudioProcessor &audioProcessor;
 
   TextButton quantizeButton;
   TextButton topRecordButton;
@@ -74,8 +78,8 @@ private:
 
   Label numBarsLabel;
   Label numBarsInput;
-  Label tempoLabel;
-  Label tempoInput;
+  Label bpmLabel;
+  Label bpmInput;
 
   ComboBox quantizationSelector;
 

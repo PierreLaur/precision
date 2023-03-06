@@ -19,10 +19,8 @@ class Metronome
 public:
   Metronome(){};
 
-  void count(AudioBuffer<float> &writePointer, int totalNumOutputChannels, int numSamples, double sampleRate);
-  void reset();
+  int count(AudioBuffer<float> &writePointer, int totalNumOutputChannels, int blockStart, int numNewSamples, double sampleRate);
 
-  int numSamplesBeforeBeat{0};
   int samplesPerBeat{0};
 
   AudioFormatManager formatManager;

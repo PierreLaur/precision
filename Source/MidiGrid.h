@@ -37,8 +37,7 @@ public:
 
   void resized() override;
 
-  void storeMidiNotes(MidiFile file, double sampleRate);
-  void processMidiMessage(MidiMessage *message, double timeStep, double sampleRate);
+  void processMidiMessage(MidiMessage *message, double position, double maxPpqPosition);
 
   void mouseDoubleClick(const MouseEvent &) override;
   void createMidiNote(Point<int> point);
@@ -54,7 +53,7 @@ public:
   Component *findModelNote(Component *noteID);
   void drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g);
 
-  void setCursorAtTimestep(int timeStep, double sampleRate);
+  void setCursorAtPpqPosition(double position);
   void hideCursor();
   void setCursorAtZero();
 

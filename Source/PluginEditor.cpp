@@ -18,6 +18,8 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
 
   setupButtons();
 
+  addAndMakeVisible(transportPanel);
+
   addAndMakeVisible(topGridView);
   addAndMakeVisible(bottomGridView);
   addAndMakeVisible(topPianoView);
@@ -71,7 +73,7 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   bottomGrid.modelGrid = &topGrid;
 }
 
-int getTempoFromString(String text)
+int getBpmFromString(String text)
 {
   std::string std_text = text.toStdString();
   for (int i = 0; i < text.length(); i++)
@@ -81,14 +83,14 @@ int getTempoFromString(String text)
       return -1;
     }
   }
-  int newTempo = text.getIntValue();
-  if (newTempo < 30 || newTempo > 300)
+  int newBpm = text.getIntValue();
+  if (newBpm < 30 || newBpm > 300)
   {
     return -1;
   }
   else
   {
-    return newTempo;
+    return newBpm;
   }
 }
 
@@ -144,9 +146,9 @@ void PrecisionAudioProcessorEditor::setupButtons()
   numBarsLabel.setText("Bars : ", dontSendNotification);
   numBarsLabel.setJustificationType(Justification::centred);
 
-  addAndMakeVisible(tempoLabel);
-  tempoLabel.setText("Tempo : ", dontSendNotification);
-  tempoLabel.setJustificationType(Justification::centred);
+  addAndMakeVisible(bpmLabel);
+  bpmLabel.setText("bpm : ", dontSendNotification);
+  bpmLabel.setJustificationType(Justification::centred);
 
   addAndMakeVisible(precisionAnalytics);
 
@@ -177,21 +179,21 @@ void PrecisionAudioProcessorEditor::setupButtons()
     }
   };
 
-  addAndMakeVisible(tempoInput);
-  tempoInput.setText(String(tempo), dontSendNotification);
-  tempoInput.setJustificationType(Justification::left);
-  tempoInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
-  tempoInput.setEditable(true);
-  tempoInput.onTextChange = [this]
+  addAndMakeVisible(bpmInput);
+  bpmInput.setText(String(bpm), dontSendNotification);
+  bpmInput.setJustificationType(Justification::left);
+  bpmInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
+  bpmInput.setEditable(true);
+  bpmInput.onTextChange = [this]
   {
-    int inputInt = getTempoFromString(tempoInput.getText());
+    int inputInt = getBpmFromString(bpmInput.getText());
     if (inputInt != -1)
     {
-      tempo = (float)inputInt;
+      bpm = (float)inputInt;
     }
     else
     {
-      tempoInput.setText(String(tempo), dontSendNotification);
+      bpmInput.setText(String(bpm), dontSendNotification);
     }
   };
 
@@ -230,8 +232,7 @@ void PrecisionAudioProcessorEditor::startRecording(GridType grid)
 {
   topGrid.setCursorAtZero();
   bottomGrid.setCursorAtZero();
-  audioProcessor.metronome.reset();
-  audioProcessor.blockStartTimesteps = 0;
+  audioProcessor.ppqRecordingStart = ppqPositionOfLastBarStart + timeSigNumerator + numPrecountBeats ;
   switch (grid)
   {
   case (GridType::Model):
@@ -358,6 +359,7 @@ void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
 
+
   topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
   bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
   topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
@@ -396,6 +398,12 @@ void PrecisionAudioProcessorEditor::resized()
       area.getWidth() - 400,
       50);
 
+  transportPanel.setBounds(
+      bottomScrollerView.getX(),
+      getLocalBounds().getBottom() - 30,
+      80,
+      25);
+
   setTransforms();
 
   // TODO : fix scrollbar weirdly disappearing
@@ -404,8 +412,8 @@ void PrecisionAudioProcessorEditor::resized()
 
   numBarsLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 40, 50, 20);
   numBarsInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 40, 30, 20);
-  tempoLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 80, 50, 20);
-  tempoInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 80, 30, 20);
+  bpmLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 80, 50, 20);
+  bpmInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 80, 30, 20);
 
   precisionAnalytics.setBounds(bottomGridView.getRight() + 10, bottomGridView.getBounds().getY() + 10,
                                getWidth() - bottomGridView.getRight() - 20, bottomGridView.getHeight() - 35);

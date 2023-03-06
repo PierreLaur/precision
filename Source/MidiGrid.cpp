@@ -78,10 +78,9 @@ void MidiGrid::paint(Graphics &g)
   paintOverChildren(g);
 }
 
-void MidiGrid::setCursorAtTimestep(int timestep, double sampleRate)
+void MidiGrid::setCursorAtPpqPosition(double position)
 {
-  int timestepsPerBeat = beatsToSamples(1.0, sampleRate);
-  int positionInPixels = (int)((double)(BEAT_LENGTH_PIXELS * timestep) / timestepsPerBeat);
+  int positionInPixels = (int)(BEAT_LENGTH_PIXELS * position);
   auto bounds = cursor.getBounds();
   bounds.setX(positionInPixels);
   cursor.setBounds(bounds);
@@ -117,7 +116,7 @@ double getDeviation(Component *note, Component *modelNote)
 {
   int deviationPixels = note->getX() - modelNote->getX();
   double deviationBeats = (double)deviationPixels / BEAT_LENGTH_PIXELS;
-  double deviationMs = 1000.0 * 60.0 * deviationBeats / (double)tempo;
+  double deviationMs = 1000.0 * 60.0 * deviationBeats / (double)bpm;
   return deviationMs;
 }
 
@@ -168,11 +167,9 @@ void MidiGrid::addToGrid(MidiNote *note)
   addAndMakeVisible(*note);
 }
 
-void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double sampleRate)
+void MidiGrid::processMidiMessage(MidiMessage *message, double relativePosition, double maxPpqPosition)
 {
-  int timestepsPerBeat = beatsToSamples(1.0, sampleRate);
-  int maxSamples = numBars * timeSigNumerator * timestepsPerBeat;
-  if (timestep > maxSamples)
+  if (relativePosition > maxPpqPosition)
     return;
   // TODO: add automatic note off when recording stops
 
@@ -180,8 +177,8 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double 
   {
     notesReceived[message->getNoteNumber()] = new MidiNote(
         message->getNoteNumber(),
-        (float)(timestep) / timestepsPerBeat,
-        0.0f,
+        relativePosition,
+        0.0,
         currentNoteID,
         *this);
     currentNoteID++;
@@ -192,7 +189,7 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double 
     if (noteOnMessage != notesReceived.end())
     {
       MidiNote *newNote = noteOnMessage->second;
-      newNote->noteLength = (float)(timestep / timestepsPerBeat) - newNote->noteStart;
+      newNote->noteLength = relativePosition - newNote->noteStart;
       newNote->setBounds((int)(newNote->noteStart * BEAT_LENGTH_PIXELS),
                          (127 - newNote->notePitch) * NOTE_HEIGHT,
                          (int)(newNote->noteLength * BEAT_LENGTH_PIXELS),
@@ -235,25 +232,6 @@ void MidiGrid::processMidiMessage(MidiMessage *message, double timestep, double 
   {
     std::cout << "Time signature meta event : " << message->getRawData() << std::endl;
   }
-}
-
-// Process all notes in a MidiFile
-void MidiGrid::storeMidiNotes(MidiFile file, double sampleRate)
-{
-  if (file.getNumTracks() != 1)
-  {
-    std::cout << "Error in storeMidiNotes : Midi file has multiple tracks" << std::endl;
-    exit(1);
-  }
-
-  auto track = *file.getTrack(0);
-
-  int eventIndex = 0;
-  for (MidiMessageSequence::MidiEventHolder *it : track)
-  {
-    processMidiMessage(&it->message, track.getEventTime(eventIndex), sampleRate);
-    eventIndex++;
-  };
 }
 
 // Create a new note where the user clicked

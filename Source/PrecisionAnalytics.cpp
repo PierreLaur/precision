@@ -14,8 +14,6 @@
 //==============================================================================
 PrecisionAnalytics::PrecisionAnalytics()
 {
-  // In your constructor, you should add any child components, and
-  // initialise any special settings that your component needs.
   precisionAnalytics.setText(
       "Precision Analytics : \n\n\n\
     Average Absolute Deviation : " +

@@ -6,6 +6,10 @@
               pluginVST3Category="Analyzer,Tools" pluginName="Precision" pluginManufacturer="PierreLaur">
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
+      <FILE id="VwSlfS" name="TransportPanel.cpp" compile="1" resource="0"
+            file="Source/TransportPanel.cpp"/>
+      <FILE id="oiXXiN" name="TransportPanel.h" compile="0" resource="0"
+            file="Source/TransportPanel.h"/>
       <FILE id="VEGeSL" name="MidiNoteDragger.cpp" compile="1" resource="0"
             file="Source/MidiNoteDragger.cpp"/>
       <FILE id="C4pej3" name="MidiNoteDragger.h" compile="0" resource="0"
