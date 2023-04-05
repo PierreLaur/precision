@@ -133,11 +133,7 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
     int numSamples = buffer.getNumSamples();
 
     // SYNC WITH HOST
-    if (auto *hostPlayHead = getPlayHead())
-    {
-        updatePlayHeadInfo(hostPlayHead->getPosition());
-        // TODO: playhead is also found in standalone mode, deal with it
-    }
+    updatePlayHeadInfo(getPlayHead()->getPosition());
 
     // AUDIO
     {
@@ -161,62 +157,67 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
         // Alternatively, you can process the samples with the channels
         // interleaved by keeping the same state.
 
-        if (studentRecording || modelRecording)
-        {
-            // int n = metronome.count(buffer, totalNumOutputChannels, blockStartTimesteps, numSamples, sampleRate);
-            // if (n != 0)
-            // {
-            //     std::cout << "Clicked at" << samplesToBeats(blockStartTimesteps + n, sampleRate) << std::endl;
-            // }
-        }
+        // if (studentRecording || modelRecording)
+        // {
+        // int n = metronome.count(buffer, totalNumOutputChannels, blockStartTimesteps, numSamples, sampleRate);
+        // if (n != 0)
+        // {
+        //     std::cout << "Clicked at" << samplesToBeats(blockStartTimesteps + n, sampleRate) << std::endl;
+        // }
+        // }
     }
 
     // MIDI
     {
 
-        double maxRelativePpqPosition = numBars * timeSigNumerator;
-        double relativePpqPosition = ppqPosition - ppqRecordingStart;
-        if ((studentRecording || modelRecording) && relativePpqPosition >= 0) {
-            for (const auto metadata : midiMessages)
+        if (studentRecording || modelRecording)
+        {
+            double maxRelativePpqPosition = numBars * timeSigNumerator;
+            relativePpqPosition = ppqPosition - ppqRecordingStart;
+            if (relativePpqPosition >= 0)
             {
-                double messageRelativePpqPosition = relativePpqPosition + samplesToBeats(metadata.samplePosition, sampleRate);
-                auto message = metadata.getMessage();
-                if (studentRecording)
+                for (const auto metadata : midiMessages)
                 {
-                    editor->bottomGrid.processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
+                    double messageRelativePpqPosition = relativePpqPosition + samplesToBeats(metadata.samplePosition, sampleRate);
+                    auto message = metadata.getMessage();
+                    if (studentRecording)
+                    {
+                        editor->bottomGrid.processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
+                    }
+                    if (modelRecording)
+                    {
+                        editor->topGrid.processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
+                    }
                 }
-                if (modelRecording)
-                {
-                    std::cout << "received midi at" << messageRelativePpqPosition << std::endl;
-                    myMessage = String(messageRelativePpqPosition);
-                    editor->topGrid.processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
-                }
-            }
 
-            // end of the recording zone
-            if (relativePpqPosition > maxRelativePpqPosition)
-            {
-                if (studentRecording)
+                // end of the recording zone
+                if (relativePpqPosition > maxRelativePpqPosition)
                 {
-                    editor->stopRecording();
-                    // LOOP
-                    editor->startRecording(GridType::Student);
+                    if (studentRecording)
+                    {
+                        editor->stopRecording();
+                        // LOOP
+                        editor->startRecording(GridType::Student);
+                    }
+                    else
+                    {
+                        editor->stopRecording();
+                    }
                 }
-                else
-                {
-                    editor->stopRecording();
-                }
-            }
-
-            // update the cursor during recording
-            if (studentRecording || modelRecording)
-            {
-                editor->topGrid.setCursorAtPpqPosition(relativePpqPosition);
-                editor->bottomGrid.setCursorAtPpqPosition(relativePpqPosition);
             }
         }
+        else
+            relativePpqPosition = 0;
     }
 
+    // If standalone, manually update the ppqPosition
+    if (isStandalone)
+    {
+        timeInSamples += numSamples;
+        timeInSeconds = timeInSamples / sampleRate;
+        ppqPosition = samplesToBeats(timeInSamples, sampleRate);
+        ppqPositionOfLastBarStart = std::floor(ppqPosition);
+    }
 }
 
 //==============================================================================

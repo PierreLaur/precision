@@ -158,6 +158,7 @@ void PrecisionAudioProcessorEditor::setupButtons()
   numBarsInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
   numBarsInput.setEditable(true);
   numBarsInput.onTextChange = [this]
+  // TODO : Prevent this to be changed when recording
   {
     int inputInt = getNumBarsFromString(numBarsInput.getText());
     if (inputInt != -1)
@@ -187,7 +188,7 @@ void PrecisionAudioProcessorEditor::setupButtons()
   bpmInput.onTextChange = [this]
   {
     int inputInt = getBpmFromString(bpmInput.getText());
-    if (inputInt != -1)
+    if (inputInt != -1 && isStandalone)
     {
       bpm = (float)inputInt;
     }
@@ -230,9 +231,7 @@ void PrecisionAudioProcessorEditor::quantizationChanged()
 
 void PrecisionAudioProcessorEditor::startRecording(GridType grid)
 {
-  topGrid.setCursorAtZero();
-  bottomGrid.setCursorAtZero();
-  audioProcessor.ppqRecordingStart = ppqPositionOfLastBarStart + timeSigNumerator + numPrecountBeats ;
+  audioProcessor.ppqRecordingStart = ppqPositionOfLastBarStart + numPrecountBeats;
   switch (grid)
   {
   case (GridType::Model):
@@ -243,14 +242,14 @@ void PrecisionAudioProcessorEditor::startRecording(GridType grid)
     bottomGrid.markNotesAsOld();
     break;
   }
+  isRecording = true;
 }
 
 void PrecisionAudioProcessorEditor::stopRecording()
 {
-  topGrid.hideCursor();
-  bottomGrid.hideCursor();
   audioProcessor.studentRecording = false;
   audioProcessor.modelRecording = false;
+  isRecording = false;
 }
 
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
@@ -358,7 +357,6 @@ void PrecisionAudioProcessorEditor::automaticZoom()
 void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
-
 
   topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
   bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);

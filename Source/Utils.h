@@ -27,10 +27,14 @@ extern double timeInSeconds;
 extern double ppqPosition;
 extern double ppqPositionOfLastBarStart;
 
-extern String myMessage;
+extern double relativePpqPosition;
+extern bool isStandalone;
+
 extern int numPrecountBeats;
 extern int numBars;
 extern float quantizationInBeats;
+
+extern bool isRecording;
 
 void setQuantizationInBeats(float newQuantization);
 double samplesToSeconds(int samples, double sampleRate);

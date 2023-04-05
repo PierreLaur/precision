@@ -20,33 +20,42 @@ int timeInSamples = 0;
 double timeInSeconds = 0.0;
 double ppqPosition = 0.0;
 double ppqPositionOfLastBarStart = 0.0;
+double relativePpqPosition = 0.0;
+bool isStandalone = false;
 
 int numPrecountBeats = 0;
-
-String myMessage = "no";
 
 int numBars = 8;
 float quantizationInBeats = 1.0;
 
+bool isRecording = false;
+
 void updatePlayHeadInfo(Optional<AudioPlayHead::PositionInfo> optInfo)
 {
-  // TODO : check optional
   if (!optInfo.hasValue())
+  {
     return;
+  }
   auto info = *optInfo;
 
-  if (info.getBpm().hasValue()) bpm = *info.getBpm();
-  
-  if (info.getTimeSignature().hasValue()) {
+  if (info.getBpm().hasValue())
+  {
+    isStandalone = false;
+    bpm = *info.getBpm();
+
     auto timeSig = *info.getTimeSignature();
     timeSigNumerator = timeSig.numerator;
     timeSigDenominator = timeSig.denominator;
-  }
 
-  if (info.getTimeInSamples().hasValue()) timeInSamples = (int)*info.getTimeInSamples();
-  if (info.getTimeInSeconds().hasValue()) timeInSeconds = *info.getTimeInSeconds();
-  if (info.getPpqPosition().hasValue()) ppqPosition = *info.getPpqPosition();
-  if (info.getPpqPositionOfLastBarStart().hasValue()) ppqPositionOfLastBarStart = *info.getPpqPositionOfLastBarStart();
+    timeInSamples = (int)*info.getTimeInSamples();
+    timeInSeconds = *info.getTimeInSeconds();
+    ppqPosition = *info.getPpqPosition();
+    ppqPositionOfLastBarStart = *info.getPpqPositionOfLastBarStart();
+  }
+  else
+  {
+    isStandalone = true;
+  }
 }
 
 double samplesToSeconds(int samples, double sampleRate)

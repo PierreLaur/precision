@@ -24,6 +24,9 @@ MidiGrid::MidiGrid(GridType type, PrecisionAnalytics &analytics) : gridType{type
   addAndMakeVisible(cursor);
   cursor.setComponentID("");
   cursor.setBounds(-5, 0, 2, getHeight());
+
+  // Start the cursor update timer
+  startTimer(60);
 }
 
 MidiGrid::~MidiGrid()
@@ -95,21 +98,6 @@ void MidiGrid::setCursorAtPpqPosition(double position)
       break;
     }
   }
-}
-
-void MidiGrid::hideCursor()
-{
-  auto bounds = cursor.getBounds();
-  bounds.setX(-5);
-  cursor.setBounds(bounds);
-  repaint();
-}
-
-void MidiGrid::setCursorAtZero()
-{
-  auto bounds = cursor.getBounds();
-  bounds.setX(0);
-  cursor.setBounds(bounds);
 }
 
 double getDeviation(Component *note, Component *modelNote)

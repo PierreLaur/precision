@@ -48,7 +48,17 @@
             "label": "run debug",
             "type": "shell",
             "command": "\"${workspaceFolder}/Builds/VisualStudio2022/x64/Debug/'Standalone Plugin'/precision.exe\"",
-            "group": "test"
+            "args": [],
+            "group": "build",
+            "presentation": {
+                "reveal": "always",
+                "focus": true,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "options": {
+                "stdio": ["pipe", "inherit"]
+            }
         }
     ]
 }

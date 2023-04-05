@@ -27,7 +27,7 @@ enum class GridType
   Model
 };
 
-class MidiGrid : public Component
+class MidiGrid : public Component, Timer
 {
 public:
   MidiGrid(GridType type, PrecisionAnalytics &analytics);
@@ -54,10 +54,17 @@ public:
   void drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g);
 
   void setCursorAtPpqPosition(double position);
-  void hideCursor();
-  void setCursorAtZero();
 
   void markNotesAsOld();
+
+  void timerCallback() override {
+    // Periodically updates the cursor position
+    if (relativePpqPosition == 0.0) {
+      setCursorAtPpqPosition(-1.0);
+    } else {
+      setCursorAtPpqPosition(relativePpqPosition);
+    }
+  }
 
   int currentNoteID = 1;
 

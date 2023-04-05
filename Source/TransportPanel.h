@@ -16,24 +16,23 @@ using namespace juce;
 
 //==============================================================================
 /*
-*/
-class TransportPanel  : public Component, Timer
+ */
+class TransportPanel : public Component, Timer
 {
 public:
-    TransportPanel();
-    ~TransportPanel() override;
+  TransportPanel();
+  ~TransportPanel() override;
 
-    void paint (Graphics&) override;
-    void resized() override;
+  void paint(Graphics &) override;
+  void resized() override;
 
-     // TODO : revert this
-    void timerCallback() override {
-        // label.setText(String(ppqPosition), dontSendNotification);
-        label.setText(myMessage, dontSendNotification);
-    }
+  void timerCallback() override
+  {
+    label.setText(String(relativePpqPosition), dontSendNotification);
+  }
 
-    Label label;
+  Label label;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransportPanel)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TransportPanel)
 };

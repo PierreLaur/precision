@@ -18,7 +18,7 @@
 class NoteBorder;
 
 MidiNote::MidiNote(int pitch, double ppqStart, double ppqLength, int noteID, MidiGrid &grid) : ResizableWindow("noName", Colours::red, false),
-                                                                                       notePitch{pitch}, noteStart{ppqStart}, noteLength{ppqLength}, parentGrid{grid}
+                                                                                               notePitch{pitch}, noteStart{ppqStart}, noteLength{ppqLength}, parentGrid{grid}
 {
     setComponentID(String(noteID));
 
@@ -61,15 +61,18 @@ void MidiNote::paint(Graphics &g)
 // Update note length, start, and pitch based on its current position on the grid
 void MidiNote::updateNote()
 {
-    noteLength = static_cast<float>(getWidth()) / BEAT_LENGTH_PIXELS;
-    noteStart = static_cast<float>(getX()) / BEAT_LENGTH_PIXELS;
-    notePitch = 127 - getY() / NOTE_HEIGHT;
+    if (!isRecording)
+    {
+        noteLength = static_cast<float>(getWidth()) / BEAT_LENGTH_PIXELS;
+        noteStart = static_cast<float>(getX()) / BEAT_LENGTH_PIXELS;
+        notePitch = 127 - getY() / NOTE_HEIGHT;
+    }
 }
 
 // Drag the note while staying on the horizontal grid
 void MidiNote::mouseDrag(const MouseEvent &e)
 {
-    if (this->dragStarted)
+    if (this->dragStarted && !isRecording)
     {
         dragger.dragComponent(this, e, &noteConstrainer,
                               static_cast<int>(BEAT_LENGTH_PIXELS * quantizationInBeats), NOTE_HEIGHT,
