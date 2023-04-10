@@ -6,40 +6,44 @@
               pluginVST3Category="Analyzer,Tools" pluginName="Precision" pluginManufacturer="PierreLaur">
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
-      <FILE id="VwSlfS" name="TransportPanel.cpp" compile="1" resource="0"
-            file="Source/TransportPanel.cpp"/>
-      <FILE id="oiXXiN" name="TransportPanel.h" compile="0" resource="0"
-            file="Source/TransportPanel.h"/>
-      <FILE id="VEGeSL" name="MidiNoteDragger.cpp" compile="1" resource="0"
-            file="Source/MidiNoteDragger.cpp"/>
-      <FILE id="C4pej3" name="MidiNoteDragger.h" compile="0" resource="0"
-            file="Source/MidiNoteDragger.h"/>
-      <FILE id="cZp40o" name="PrecisionAnalytics.cpp" compile="1" resource="0"
-            file="Source/PrecisionAnalytics.cpp"/>
-      <FILE id="T0P98e" name="PrecisionAnalytics.h" compile="0" resource="0"
-            file="Source/PrecisionAnalytics.h"/>
+      <GROUP id="{6372F47F-085D-44C4-39EA-6E43D5F7F234}" name="UI">
+        <FILE id="f1pCaq" name="LinkableViewport.cpp" compile="1" resource="0"
+              file="Source/LinkableViewport.cpp"/>
+        <FILE id="Vl8Kcu" name="LinkableViewport.h" compile="0" resource="0"
+              file="Source/LinkableViewport.h"/>
+        <FILE id="WaTsbg" name="VerticalPiano.cpp" compile="1" resource="0"
+              file="Source/VerticalPiano.cpp"/>
+        <FILE id="nwX0uA" name="VerticalPiano.h" compile="0" resource="0" file="Source/VerticalPiano.h"/>
+        <FILE id="vzTUGB" name="MidiNote.cpp" compile="1" resource="0" file="Source/MidiNote.cpp"/>
+        <FILE id="hOup0n" name="MidiNote.h" compile="0" resource="0" file="Source/MidiNote.h"/>
+        <FILE id="oc9KqD" name="MidiGrid.cpp" compile="1" resource="0" file="Source/MidiGrid.cpp"/>
+        <FILE id="NTqQGB" name="MidiGrid.h" compile="0" resource="0" file="Source/MidiGrid.h"/>
+        <FILE id="VwSlfS" name="TransportPanel.cpp" compile="1" resource="0"
+              file="Source/TransportPanel.cpp"/>
+        <FILE id="oiXXiN" name="TransportPanel.h" compile="0" resource="0"
+              file="Source/TransportPanel.h"/>
+        <FILE id="ncY7Hf" name="PlaybackCursor.cpp" compile="1" resource="0"
+              file="Source/PlaybackCursor.cpp"/>
+        <FILE id="rP4baJ" name="PlaybackCursor.h" compile="0" resource="0"
+              file="Source/PlaybackCursor.h"/>
+        <FILE id="uwltUl" name="BeatScroller.cpp" compile="1" resource="0"
+              file="Source/BeatScroller.cpp"/>
+        <FILE id="tIWqQy" name="BeatScroller.h" compile="0" resource="0" file="Source/BeatScroller.h"/>
+        <FILE id="VEGeSL" name="MidiNoteDragger.cpp" compile="1" resource="0"
+              file="Source/MidiNoteDragger.cpp"/>
+        <FILE id="C4pej3" name="MidiNoteDragger.h" compile="0" resource="0"
+              file="Source/MidiNoteDragger.h"/>
+        <FILE id="ShCVR0" name="NoteBorder.cpp" compile="1" resource="0" file="Source/NoteBorder.cpp"/>
+        <FILE id="mbzY8d" name="NoteBorder.h" compile="0" resource="0" file="Source/NoteBorder.h"/>
+        <FILE id="cZp40o" name="PrecisionAnalytics.cpp" compile="1" resource="0"
+              file="Source/PrecisionAnalytics.cpp"/>
+        <FILE id="T0P98e" name="PrecisionAnalytics.h" compile="0" resource="0"
+              file="Source/PrecisionAnalytics.h"/>
+        <FILE id="feeRss" name="MidiView.cpp" compile="1" resource="0" file="Source/MidiView.cpp"/>
+        <FILE id="Wexcl2" name="MidiView.h" compile="0" resource="0" file="Source/MidiView.h"/>
+      </GROUP>
       <FILE id="a1YPEO" name="Metronome.cpp" compile="1" resource="0" file="Source/Metronome.cpp"/>
       <FILE id="gxSLha" name="Metronome.h" compile="0" resource="0" file="Source/Metronome.h"/>
-      <FILE id="ncY7Hf" name="PlaybackCursor.cpp" compile="1" resource="0"
-            file="Source/PlaybackCursor.cpp"/>
-      <FILE id="rP4baJ" name="PlaybackCursor.h" compile="0" resource="0"
-            file="Source/PlaybackCursor.h"/>
-      <FILE id="uwltUl" name="BeatScroller.cpp" compile="1" resource="0"
-            file="Source/BeatScroller.cpp"/>
-      <FILE id="tIWqQy" name="BeatScroller.h" compile="0" resource="0" file="Source/BeatScroller.h"/>
-      <FILE id="ShCVR0" name="NoteBorder.cpp" compile="1" resource="0" file="Source/NoteBorder.cpp"/>
-      <FILE id="mbzY8d" name="NoteBorder.h" compile="0" resource="0" file="Source/NoteBorder.h"/>
-      <FILE id="f1pCaq" name="LinkableViewport.cpp" compile="1" resource="0"
-            file="Source/LinkableViewport.cpp"/>
-      <FILE id="Vl8Kcu" name="LinkableViewport.h" compile="0" resource="0"
-            file="Source/LinkableViewport.h"/>
-      <FILE id="WaTsbg" name="VerticalPiano.cpp" compile="1" resource="0"
-            file="Source/VerticalPiano.cpp"/>
-      <FILE id="nwX0uA" name="VerticalPiano.h" compile="0" resource="0" file="Source/VerticalPiano.h"/>
-      <FILE id="vzTUGB" name="MidiNote.cpp" compile="1" resource="0" file="Source/MidiNote.cpp"/>
-      <FILE id="hOup0n" name="MidiNote.h" compile="0" resource="0" file="Source/MidiNote.h"/>
-      <FILE id="oc9KqD" name="MidiGrid.cpp" compile="1" resource="0" file="Source/MidiGrid.cpp"/>
-      <FILE id="NTqQGB" name="MidiGrid.h" compile="0" resource="0" file="Source/MidiGrid.h"/>
       <FILE id="cbvoq2" name="Utils.h" compile="0" resource="0" file="Source/Utils.h"/>
       <FILE id="vJFNBF" name="Utils.cpp" compile="1" resource="0" file="Source/Utils.cpp"/>
       <FILE id="bbgX1g" name="PluginProcessor.cpp" compile="1" resource="0"

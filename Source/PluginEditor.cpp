@@ -2,7 +2,6 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "MidiGrid.h"
 #include "Utils.h"
 #include <filesystem>
 #include <iostream>
@@ -19,59 +18,14 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   setupButtons();
 
   addAndMakeVisible(transportPanel);
-
-  addAndMakeVisible(topGridView);
-  addAndMakeVisible(bottomGridView);
-  addAndMakeVisible(topPianoView);
-
-  addAndMakeVisible(bottomPianoView);
-  addAndMakeVisible(topScrollerView);
-  addAndMakeVisible(bottomScrollerView);
-
-  // Synchronize scrolling on both viewports
-  topGridView.linkViewport(&topPianoView);
-  topGridView.linkViewport(&bottomPianoView);
-  topGridView.linkViewport(&bottomGridView);
-  topGridView.linkViewport(&topScrollerView);
-  topGridView.linkViewport(&bottomScrollerView);
-
-  bottomGridView.linkViewport(&topPianoView);
-  bottomGridView.linkViewport(&bottomPianoView);
-  bottomGridView.linkViewport(&topGridView);
-  bottomGridView.linkViewport(&topScrollerView);
-  bottomGridView.linkViewport(&bottomScrollerView);
-
-  topGridView.setViewedComponent(&topGrid, false);
-
-  bottomGridView.setViewedComponent(&bottomGrid, false);
-
-  topScrollerView.setViewedComponent(&topScroller, false);
-  bottomScrollerView.setViewedComponent(&bottomScroller, false);
-
-  topPianoView.setViewedComponent(&topPiano, false);
-  bottomPianoView.setViewedComponent(&bottomPiano, false);
-
-  // centers of the grids
-  topGridView.setViewPosition(Point(0, topGrid.getHeight() / 2));
-  bottomGridView.setViewPosition(Point(0, bottomGrid.getHeight() / 2));
-
-  // Hide the vertical scrollbar, show the horizontal one
-  topGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
-  topGridView.setScrollBarsShown(false, true, true);
-  bottomGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
-  bottomGridView.setScrollBarsShown(false, true, true);
-
-  topPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  topPianoView.setScrollBarsShown(false, false);
-  bottomPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  bottomPianoView.setScrollBarsShown(false, false);
-  topScrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  topScrollerView.setScrollBarsShown(false, false);
-  bottomScrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  bottomScrollerView.setScrollBarsShown(false, false);
-
-  bottomGrid.modelGrid = &topGrid;
+  addAndMakeVisible(midiView);
 }
+
+PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
+{
+}
+
+//==============================================================================
 
 int getBpmFromString(String text)
 {
@@ -164,15 +118,9 @@ void PrecisionAudioProcessorEditor::setupButtons()
     if (inputInt != -1)
     {
       numBars = inputInt;
-      minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / (BEAT_LENGTH_PIXELS * numBars * timeSigNumerator);
-      widthMultiplier = std::max(widthMultiplier * 0.8f, minWidthMultiplier);
 
-      topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-      bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-      topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-      bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-
-      setTransforms();
+      midiView.setNumBars();
+      midiView.scaleView();
     }
     else
     {
@@ -213,11 +161,6 @@ void PrecisionAudioProcessorEditor::setupButtons()
   addAndMakeVisible(quantizationSelector);
 }
 
-PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
-{
-}
-
-//==============================================================================
 void PrecisionAudioProcessorEditor::paint(Graphics &g)
 {
   g.fillAll(Colours::transparentBlack);
@@ -239,7 +182,7 @@ void PrecisionAudioProcessorEditor::startRecording(GridType grid)
     break;
   case (GridType::Student):
     audioProcessor.studentRecording = true;
-    bottomGrid.markNotesAsOld();
+    midiView.markStudentNotesAsOld();
     break;
   }
   isRecording = true;
@@ -255,7 +198,7 @@ void PrecisionAudioProcessorEditor::stopRecording()
 void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
 {
   if (button == &quantizeButton)
-    topGrid.quantize();
+    midiView.quantizeModelGrid();
   if (button == &topRecordButton)
   {
     if (audioProcessor.studentRecording && audioProcessor.modelRecording)
@@ -303,152 +246,88 @@ void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
   // TODO : update analytics on grid repaint (make it a separate component & add a reference to it in midigrid)
   if (button == &topClearButton)
   {
-    topGrid.clearNotes();
+    midiView.clearNotes(GridType::Model);
   }
   if (button == &bottomClearButton)
   {
-    bottomGrid.clearNotes();
+    midiView.clearNotes(GridType::Student);
   }
-}
-
-void PrecisionAudioProcessorEditor::setTransforms()
-{
-  topPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
-  topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-  bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
-  bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-  topScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
-  bottomScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
-}
-
-void PrecisionAudioProcessorEditor::verticalZoom(const MouseWheelDetails wheel)
-{
-  if (wheel.deltaY > 0)
-  {
-    heightMultiplier = 1.2f * heightMultiplier;
-  }
-  else
-  {
-    heightMultiplier = std::max(heightMultiplier * 0.8f, minHeightMultiplier);
-  }
-  setTransforms();
-}
-
-void PrecisionAudioProcessorEditor::horizontalZoom(const MouseWheelDetails wheel)
-// TODO : zooming/unzooming with touchpad
-{
-  if (wheel.deltaY > 0)
-  {
-    widthMultiplier = 1.2f * widthMultiplier;
-  }
-  else
-  {
-    widthMultiplier = std::max(widthMultiplier * 0.8f, minWidthMultiplier);
-  }
-  setTransforms();
-}
-
-void PrecisionAudioProcessorEditor::automaticZoom()
-{
-  // TODO : adapt zoom to the notes on the grid
-  // TODO : follow the cursor
 }
 
 void PrecisionAudioProcessorEditor::resized()
 {
   auto area = getLocalBounds();
+  int horizontalMargin = 20;
+  int verticalMargin = 20;
 
-  topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-  bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-  topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-  bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-
-  topPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
-  bottomPiano.setSize(PIANO_WIDTH, NOTE_HEIGHT * 128);
-
-  topGridView.setBounds(
-      50, 70,
-      area.getWidth() - 400,
-      250 + topGridView.getHorizontalScrollBar().getHeight());
-
-  bottomGridView.setBounds(
-      50, 400,
-      area.getWidth() - 400,
-      250 + bottomGridView.getHorizontalScrollBar().getHeight());
-
-  topPianoView.setBounds(
-      20, 70,
-      PIANO_WIDTH,
-      250);
-
-  bottomPianoView.setBounds(
-      20, 400,
-      PIANO_WIDTH,
-      250);
-
-  topScrollerView.setBounds(
-      PIANO_WIDTH + 20, 20,
-      area.getWidth() - 400,
-      50);
-
-  bottomScrollerView.setBounds(
-      PIANO_WIDTH + 20, 350,
-      area.getWidth() - 400,
-      50);
-
+  midiView.setBounds(
+      horizontalMargin, verticalMargin,
+      (int)((area.getWidth() - 2 * horizontalMargin) * 0.8),
+      (int)((area.getHeight() - verticalMargin * 2) * 0.98));
+  midiView.scaleView();
+  
   transportPanel.setBounds(
-      bottomScrollerView.getX(),
-      getLocalBounds().getBottom() - 30,
+      midiView.getX(),
+      area.getBottom() - verticalMargin,
+      80,
+      50);
+
+  // Right Panel
+  topRecordButton.setBounds(
+      midiView.getRight() + horizontalMargin,
+      midiView.getY(),
+      80,
+      25);
+  topClearButton.setBounds(
+      midiView.getRight() + horizontalMargin,
+      topRecordButton.getBottom() + verticalMargin,
       80,
       25);
 
-  setTransforms();
+  numBarsLabel.setBounds(
+      midiView.getRight() + horizontalMargin,
+      topClearButton.getBottom() + verticalMargin,
+      50, 20);
+  numBarsInput.setBounds(
+      numBarsLabel.getRight() + horizontalMargin,
+      numBarsLabel.getBounds().getY(),
+      30, 20);
 
-  // TODO : fix scrollbar weirdly disappearing
-  minHeightMultiplier = static_cast<float>(topGridView.getHeight() - topGridView.getHorizontalScrollBar().getHeight()) / topGrid.getHeight();
-  minWidthMultiplier = static_cast<float>(topGridView.getWidth()) / topGrid.getWidth();
-
-  numBarsLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 40, 50, 20);
-  numBarsInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 40, 30, 20);
-  bpmLabel.setBounds(topGridView.getRight() + 10, topGridView.getBounds().getY() + 80, 50, 20);
-  bpmInput.setBounds(topGridView.getRight() + 60, topGridView.getBounds().getY() + 80, 30, 20);
-
-  precisionAnalytics.setBounds(bottomGridView.getRight() + 10, bottomGridView.getBounds().getY() + 10,
-                               getWidth() - bottomGridView.getRight() - 20, bottomGridView.getHeight() - 35);
+  bpmLabel.setBounds(
+      midiView.getRight() + horizontalMargin, 
+      numBarsLabel.getBottom() + verticalMargin, 
+      50, 20);
+  bpmInput.setBounds(
+      bpmLabel.getRight() + horizontalMargin,
+      bpmLabel.getBounds().getY(),
+      30, 20);
 
   quantizeButton.setBounds(
-      topGridView.getRight() + 10,
-      topGridView.getBounds().getCentreY(),
-      80,
-      25);
-
-  topRecordButton.setBounds(
-      topScrollerView.getRight() + 10,
-      topScrollerView.getY(),
-      80,
-      25);
-
-  bottomRecordButton.setBounds(
-      bottomScrollerView.getRight() + 10,
-      bottomScrollerView.getY(),
-      80,
-      25);
-
-  topClearButton.setBounds(
-      topScrollerView.getRight() + 10,
-      topScrollerView.getY() + 30,
-      80,
-      25);
-
-  bottomClearButton.setBounds(
-      bottomScrollerView.getRight() + 10,
-      bottomScrollerView.getY() + 30,
+      midiView.getRight() + horizontalMargin, 
+      bpmLabel.getBottom() + verticalMargin,
       80,
       25);
 
   quantizationSelector.setBounds(
-      topGridView.getRight() + 10,
-      topGridView.getBounds().getCentreY() + 30,
+      quantizeButton.getRight() + horizontalMargin, 
+      quantizeButton.getBounds().getY(),
       80,
       25);
+
+  bottomRecordButton.setBounds(
+      midiView.getRight() + horizontalMargin, 
+      midiView.bottomScrollerView.getBounds().getY() + verticalMargin,
+      80,
+      25);
+  bottomClearButton.setBounds(
+      midiView.getRight() + horizontalMargin, 
+      bottomRecordButton.getBottom() + verticalMargin,
+      80,
+      25);
+
+  precisionAnalytics.setBounds(
+    midiView.getRight() + horizontalMargin, 
+    bottomClearButton.getBottom() + verticalMargin,
+    getWidth() - midiView.getRight() - 2*horizontalMargin, 
+    midiView.getBottom() - bottomClearButton.getBottom() - verticalMargin);
 }

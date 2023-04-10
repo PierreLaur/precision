@@ -16,7 +16,7 @@
 #include <map>
 
 //==============================================================================
-MidiGrid::MidiGrid(GridType type, PrecisionAnalytics &analytics) : gridType{type}, analytics{analytics}
+MidiGrid::MidiGrid(GridType type, PrecisionAnalytics & analytics) : gridType{type}, analytics{analytics}
 {
   // TODO: check if this is useful
   setLookAndFeel(&lf);
@@ -99,6 +99,7 @@ void MidiGrid::setCursorAtPpqPosition(double position)
     }
   }
 }
+
 
 double getDeviation(Component *note, Component *modelNote)
 {

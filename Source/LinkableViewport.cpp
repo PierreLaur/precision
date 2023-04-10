@@ -9,11 +9,11 @@
 */
 
 #include "LinkableViewport.h"
-#include "PluginEditor.h"
+#include "MidiView.h"
 
 class PrecisionAudioProcessorEditor;
 
-LinkableViewport::LinkableViewport(PrecisionAudioProcessorEditor &editor) : Viewport::Viewport("noName"), editor{editor}
+LinkableViewport::LinkableViewport(MidiView& midiView) : Viewport::Viewport("noName"), midiView{midiView}
 {
   setSingleStepSizes(8, 8);
 }
@@ -34,12 +34,14 @@ bool LinkableViewport::useMouseWheelMoveIfNeeded(const MouseEvent &e, const Mous
 {
   if (e.mods.isCtrlDown() || e.mods.isCommandDown())
   {
-    editor.horizontalZoom(wheel);
+    // TODO
+    midiView.horizontalZoom(wheel);
     return true;
   }
   else if (e.mods.isAltDown())
   {
-    editor.verticalZoom(wheel);
+    // TODO
+    midiView.verticalZoom(wheel);
     return true;
   }
   else

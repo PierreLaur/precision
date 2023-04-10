@@ -54,6 +54,7 @@ void BeatScroller::paint(Graphics &g)
       if (beat != 1)
         time += "." + String(beat);
 
+      // TODO : make this less ugly
       g.drawText(time,
                  Rectangle(
                      Point(static_cast<float>(i), static_cast<float>(getHeight()) / 2),

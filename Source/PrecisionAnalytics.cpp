@@ -42,6 +42,8 @@ void PrecisionAnalytics::update(double newAverageAbsoluteDeviationMs, double new
 void PrecisionAnalytics::paint(Graphics &g)
 {
   g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)); // clear the background
+  g.setColour(Colours::black);
+  g.drawRect(getLocalBounds());
 
   precisionAnalytics.setText(
       "Precision Analytics : \n\n\n\
