@@ -182,7 +182,7 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
                     auto message = metadata.getMessage();
                     if (studentRecording)
                     {
-                        editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Student);  
+                        editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Student);
                     }
                     if (modelRecording)
                     {

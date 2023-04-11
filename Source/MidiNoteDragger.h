@@ -14,16 +14,16 @@
 
 //==============================================================================
 /*
-*/
-class MidiNoteDragger  : public juce::Component
+ */
+class MidiNoteDragger : public juce::Component
 {
 public:
-    MidiNoteDragger();
-    ~MidiNoteDragger() override;
+  MidiNoteDragger();
+  ~MidiNoteDragger() override;
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
+  void paint(juce::Graphics &) override;
+  void resized() override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MidiNoteDragger)
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MidiNoteDragger)
 };

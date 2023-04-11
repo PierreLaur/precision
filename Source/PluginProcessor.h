@@ -66,9 +66,8 @@ public:
   bool studentRecording = false;
   bool modelRecording = false;
 
-  double ppqRecordingStart = 0.0; 
+  double ppqRecordingStart = 0.0;
   Metronome metronome;
-
 
 private:
   //==============================================================================

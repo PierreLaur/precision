@@ -15,106 +15,29 @@ PrecisionAudioProcessorEditor::PrecisionAudioProcessorEditor(PrecisionAudioProce
   setSize(defaultWidth, defaultHeight);
   setResizable(true, true);
 
-  setupButtons();
-
-  addAndMakeVisible(transportPanel);
-  addAndMakeVisible(midiView);
-}
-
-PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
-{
-}
-
-//==============================================================================
-
-int getBpmFromString(String text)
-{
-  std::string std_text = text.toStdString();
-  for (int i = 0; i < text.length(); i++)
-  {
-    if (!isdigit(std_text.at(i)))
-    {
-      return -1;
-    }
-  }
-  int newBpm = text.getIntValue();
-  if (newBpm < 30 || newBpm > 300)
-  {
-    return -1;
-  }
-  else
-  {
-    return newBpm;
-  }
-}
-
-int getNumBarsFromString(String text)
-{
-  std::string std_text = text.toStdString();
-  for (int i = 0; i < text.length(); i++)
-  {
-    if (!isdigit(std_text.at(i)))
-    {
-      return -1;
-    }
-  }
-  int newNumBars = text.getIntValue();
-  if (newNumBars < 1 || newNumBars > 128)
-  {
-    return -1;
-  }
-  else
-  {
-    return newNumBars;
-  }
-}
-
-void PrecisionAudioProcessorEditor::setupButtons()
-{
-  quantizeButton.setColour(TextButton::buttonColourId, Colours::grey);
-  quantizeButton.setButtonText("Quantize");
-  quantizeButton.addListener(this);
-  addAndMakeVisible(quantizeButton);
-
-  topRecordButton.setColour(TextButton::buttonColourId, Colours::red);
-  topRecordButton.setButtonText("Record");
-  topRecordButton.addListener(this);
-  addAndMakeVisible(topRecordButton);
-
-  bottomRecordButton.setColour(TextButton::buttonColourId, Colours::red);
-  bottomRecordButton.setButtonText("Record");
-  bottomRecordButton.addListener(this);
-  addAndMakeVisible(bottomRecordButton);
-
-  topClearButton.setColour(TextButton::buttonColourId, Colours::blue);
-  topClearButton.setButtonText("Clear");
-  topClearButton.addListener(this);
-  addAndMakeVisible(topClearButton);
-
-  bottomClearButton.setColour(TextButton::buttonColourId, Colours::blue);
-  bottomClearButton.setButtonText("Clear");
-  bottomClearButton.addListener(this);
-  addAndMakeVisible(bottomClearButton);
-
-  addAndMakeVisible(numBarsLabel);
-  numBarsLabel.setText("Bars : ", dontSendNotification);
-  numBarsLabel.setJustificationType(Justification::centred);
-
-  addAndMakeVisible(bpmLabel);
-  bpmLabel.setText("bpm : ", dontSendNotification);
-  bpmLabel.setJustificationType(Justification::centred);
-
   addAndMakeVisible(precisionAnalytics);
+  addAndMakeVisible(midiView);
+  addAndMakeVisible(transportPanel);
+  addAndMakeVisible(controlPanel);
 
-  addAndMakeVisible(numBarsInput);
-  numBarsInput.setText(String(numBars), dontSendNotification);
-  numBarsInput.setJustificationType(Justification::left);
-  numBarsInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
-  numBarsInput.setEditable(true);
-  numBarsInput.onTextChange = [this]
-  // TODO : Prevent this to be changed when recording
+  // Setup std functions for the control panel
+  controlPanel.onUpdate = [this](Button *button)
+  { panelUpdate(button); };
+  controlPanel.bpmInput.onTextChange = [this]
   {
-    int inputInt = getNumBarsFromString(numBarsInput.getText());
+    int inputInt = controlPanel.getBpmFromString(controlPanel.bpmInput.getText());
+    if (inputInt != -1 && isStandalone)
+    {
+      bpm = (float)inputInt;
+    }
+    else
+    {
+      controlPanel.bpmInput.setText(String(bpm), dontSendNotification);
+    }
+  };
+  controlPanel.numBarsInput.onTextChange = [this]
+  {
+    int inputInt = controlPanel.getNumBarsFromString(controlPanel.numBarsInput.getText());
     if (inputInt != -1)
     {
       numBars = inputInt;
@@ -124,52 +47,79 @@ void PrecisionAudioProcessorEditor::setupButtons()
     }
     else
     {
-      numBarsInput.setText(String(numBars), dontSendNotification);
+      controlPanel.numBarsInput.setText(String(numBars), dontSendNotification);
     }
   };
-
-  addAndMakeVisible(bpmInput);
-  bpmInput.setText(String(bpm), dontSendNotification);
-  bpmInput.setJustificationType(Justification::left);
-  bpmInput.setColour(juce::Label::backgroundColourId, juce::Colours::grey);
-  bpmInput.setEditable(true);
-  bpmInput.onTextChange = [this]
-  {
-    int inputInt = getBpmFromString(bpmInput.getText());
-    if (inputInt != -1 && isStandalone)
-    {
-      bpm = (float)inputInt;
-    }
-    else
-    {
-      bpmInput.setText(String(bpm), dontSendNotification);
-    }
-  };
-
-  quantizationSelector.addItem("1/1", 1);
-  quantizationSelector.addItem("1/2", 2);
-  quantizationSelector.addItem("1/4", 4);
-  quantizationSelector.addItem("1/8", 8);
-  quantizationSelector.addItem("1/16", 16);
-  quantizationSelector.addItem("1/32", 32);
-
-  quantizationSelector.setSelectedId(4);
-  quantizationInBeats = 1.0f;
-  quantizationSelector.onChange = [this]
-  { quantizationChanged(); };
-
-  addAndMakeVisible(quantizationSelector);
 }
+
+PrecisionAudioProcessorEditor::~PrecisionAudioProcessorEditor()
+{
+}
+
+//==============================================================================
 
 void PrecisionAudioProcessorEditor::paint(Graphics &g)
 {
   g.fillAll(Colours::transparentBlack);
 }
 
-void PrecisionAudioProcessorEditor::quantizationChanged()
+void PrecisionAudioProcessorEditor::panelUpdate(Button *button)
 {
-  quantizationInBeats = 4.0f / (float)quantizationSelector.getSelectedId();
-  repaint();
+  if (button == &controlPanel.quantizeButton)
+    midiView.quantizeModelGrid();
+  if (button == &controlPanel.topRecordButton)
+  {
+    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
+    {
+      print("Error : two grids recording at the same time");
+      stopRecording();
+      startRecording(GridType::Model);
+    }
+    else if (audioProcessor.modelRecording)
+    {
+      stopRecording();
+    }
+    else if (audioProcessor.studentRecording)
+    {
+      stopRecording();
+      startRecording(GridType::Model);
+    }
+    else
+    {
+      startRecording(GridType::Model);
+    }
+  }
+  if (button == &controlPanel.bottomRecordButton)
+  {
+    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
+    {
+      print("Error : two grids recording at the same time");
+      stopRecording();
+      startRecording(GridType::Student);
+    }
+    else if (audioProcessor.studentRecording)
+    {
+      stopRecording();
+    }
+    else if (audioProcessor.modelRecording)
+    {
+      stopRecording();
+      startRecording(GridType::Student);
+    }
+    else
+    {
+      startRecording(GridType::Student);
+    }
+  }
+  // TODO : update analytics on grid repaint (make it a separate component & add a reference to it in midigrid)
+  if (button == &controlPanel.topClearButton)
+  {
+    midiView.clearNotes(GridType::Model);
+  }
+  if (button == &controlPanel.bottomClearButton)
+  {
+    midiView.clearNotes(GridType::Student);
+  }
 }
 
 void PrecisionAudioProcessorEditor::startRecording(GridType grid)
@@ -195,67 +145,9 @@ void PrecisionAudioProcessorEditor::stopRecording()
   isRecording = false;
 }
 
-void PrecisionAudioProcessorEditor::buttonClicked(Button *button)
-{
-  if (button == &quantizeButton)
-    midiView.quantizeModelGrid();
-  if (button == &topRecordButton)
-  {
-    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
-    {
-      print("Error : two grids recording at the same time");
-      stopRecording();
-      startRecording(GridType::Model);
-    }
-    else if (audioProcessor.modelRecording)
-    {
-      stopRecording();
-    }
-    else if (audioProcessor.studentRecording)
-    {
-      stopRecording();
-      startRecording(GridType::Model);
-    }
-    else
-    {
-      startRecording(GridType::Model);
-    }
-  }
-  if (button == &bottomRecordButton)
-  {
-    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
-    {
-      print("Error : two grids recording at the same time");
-      stopRecording();
-      startRecording(GridType::Student);
-    }
-    else if (audioProcessor.studentRecording)
-    {
-      stopRecording();
-    }
-    else if (audioProcessor.modelRecording)
-    {
-      stopRecording();
-      startRecording(GridType::Student);
-    }
-    else
-    {
-      startRecording(GridType::Student);
-    }
-  }
-  // TODO : update analytics on grid repaint (make it a separate component & add a reference to it in midigrid)
-  if (button == &topClearButton)
-  {
-    midiView.clearNotes(GridType::Model);
-  }
-  if (button == &bottomClearButton)
-  {
-    midiView.clearNotes(GridType::Student);
-  }
-}
-
 void PrecisionAudioProcessorEditor::resized()
 {
+
   auto area = getLocalBounds();
   int horizontalMargin = 20;
   int verticalMargin = 20;
@@ -265,69 +157,22 @@ void PrecisionAudioProcessorEditor::resized()
       (int)((area.getWidth() - 2 * horizontalMargin) * 0.8),
       (int)((area.getHeight() - verticalMargin * 2) * 0.98));
   midiView.scaleView();
-  
+
   transportPanel.setBounds(
       midiView.getX(),
-      area.getBottom() - verticalMargin,
-      80,
-      50);
+      midiView.getBottom() + verticalMargin,
+      midiView.getWidth(),
+      area.getHeight() - midiView.getBottom() - verticalMargin * 2);
 
-  // Right Panel
-  topRecordButton.setBounds(
+  controlPanel.setBounds(
       midiView.getRight() + horizontalMargin,
       midiView.getY(),
-      80,
-      25);
-  topClearButton.setBounds(
-      midiView.getRight() + horizontalMargin,
-      topRecordButton.getBottom() + verticalMargin,
-      80,
-      25);
-
-  numBarsLabel.setBounds(
-      midiView.getRight() + horizontalMargin,
-      topClearButton.getBottom() + verticalMargin,
-      50, 20);
-  numBarsInput.setBounds(
-      numBarsLabel.getRight() + horizontalMargin,
-      numBarsLabel.getBounds().getY(),
-      30, 20);
-
-  bpmLabel.setBounds(
-      midiView.getRight() + horizontalMargin, 
-      numBarsLabel.getBottom() + verticalMargin, 
-      50, 20);
-  bpmInput.setBounds(
-      bpmLabel.getRight() + horizontalMargin,
-      bpmLabel.getBounds().getY(),
-      30, 20);
-
-  quantizeButton.setBounds(
-      midiView.getRight() + horizontalMargin, 
-      bpmLabel.getBottom() + verticalMargin,
-      80,
-      25);
-
-  quantizationSelector.setBounds(
-      quantizeButton.getRight() + horizontalMargin, 
-      quantizeButton.getBounds().getY(),
-      80,
-      25);
-
-  bottomRecordButton.setBounds(
-      midiView.getRight() + horizontalMargin, 
-      midiView.bottomScrollerView.getBounds().getY() + verticalMargin,
-      80,
-      25);
-  bottomClearButton.setBounds(
-      midiView.getRight() + horizontalMargin, 
-      bottomRecordButton.getBottom() + verticalMargin,
-      80,
-      25);
+      area.getWidth() - midiView.getRight() - horizontalMargin * 2,
+      midiView.bottomScrollerView.getY() - midiView.getY() + 2 * (25 + verticalMargin));
 
   precisionAnalytics.setBounds(
-    midiView.getRight() + horizontalMargin, 
-    bottomClearButton.getBottom() + verticalMargin,
-    getWidth() - midiView.getRight() - 2*horizontalMargin, 
-    midiView.getBottom() - bottomClearButton.getBottom() - verticalMargin);
+      midiView.getRight() + horizontalMargin,
+      controlPanel.getBottom() + verticalMargin,
+      getWidth() - midiView.getRight() - 2 * horizontalMargin,
+      midiView.getBottom() - controlPanel.getBottom() - verticalMargin);
 }

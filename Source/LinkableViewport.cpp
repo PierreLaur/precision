@@ -11,9 +11,7 @@
 #include "LinkableViewport.h"
 #include "MidiView.h"
 
-class PrecisionAudioProcessorEditor;
-
-LinkableViewport::LinkableViewport(MidiView& midiView) : Viewport::Viewport("noName"), midiView{midiView}
+LinkableViewport::LinkableViewport(MidiView &midiView) : Viewport::Viewport("noName"), midiView{midiView}
 {
   setSingleStepSizes(8, 8);
 }

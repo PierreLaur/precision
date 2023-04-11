@@ -13,14 +13,13 @@
 #include <JuceHeader.h>
 #include <list>
 
-
 using namespace juce;
 class MidiView;
 
 class LinkableViewport : public Viewport
 {
 public:
-  LinkableViewport(MidiView&);
+  LinkableViewport(MidiView &);
 
   void visibleAreaChanged(const Rectangle<int> &newVisibleArea) override;
   bool useMouseWheelMoveIfNeeded(const MouseEvent &, const MouseWheelDetails &) override;

@@ -16,7 +16,7 @@
 #include <map>
 
 //==============================================================================
-MidiGrid::MidiGrid(GridType type, PrecisionAnalytics & analytics) : gridType{type}, analytics{analytics}
+MidiGrid::MidiGrid(GridType type, PrecisionAnalytics &analytics) : gridType{type}, analytics{analytics}
 {
   // TODO: check if this is useful
   setLookAndFeel(&lf);
@@ -99,7 +99,6 @@ void MidiGrid::setCursorAtPpqPosition(double position)
     }
   }
 }
-
 
 double getDeviation(Component *note, Component *modelNote)
 {
@@ -264,6 +263,7 @@ void MidiGrid::mouseDoubleClick(const MouseEvent &e)
 
 void MidiGrid::quantize()
 {
+
   for (auto const &[ID, note] : notesOnGrid)
   {
     float currentStart = (float)(note->getX()) / BEAT_LENGTH_PIXELS;

@@ -13,11 +13,12 @@
 #include "PrecisionAnalytics.h"
 #include "TransportPanel.h"
 #include "MidiView.h"
+#include "ControlPanel.h"
 
 using namespace juce;
 
 //==============================================================================
-class PrecisionAudioProcessorEditor : public AudioProcessorEditor, public Button::Listener
+class PrecisionAudioProcessorEditor : public AudioProcessorEditor
 {
 public:
   PrecisionAudioProcessorEditor(PrecisionAudioProcessor &);
@@ -26,44 +27,31 @@ public:
   //==============================================================================
   void paint(Graphics &) override;
   void resized() override;
-
-  void quantizationChanged();
-
-  void buttonClicked(Button *button) override;
-  void setupButtons();
+  void panelUpdate(Button *button);
 
   void startRecording(GridType grid);
   void stopRecording();
 
-  void processMidiMessage(MidiMessage *message, double position, double maxPpqPosition, GridType grid) {
-    if (grid == GridType::Student) {
+  void processMidiMessage(MidiMessage *message, double position, double maxPpqPosition, GridType grid)
+  {
+    if (grid == GridType::Student)
+    {
       midiView.bottomGrid.processMidiMessage(message, position, maxPpqPosition);
-    } else {
+    }
+    else
+    {
       midiView.topGrid.processMidiMessage(message, position, maxPpqPosition);
     }
   }
 
   PrecisionAnalytics precisionAnalytics;
   MidiView midiView = MidiView(precisionAnalytics);
-
   TransportPanel transportPanel;
+  ControlPanel controlPanel = ControlPanel();
+
   PrecisionAudioProcessor &audioProcessor;
 
 private:
-
-  TextButton quantizeButton;
-  TextButton topRecordButton;
-  TextButton bottomRecordButton;
-  TextButton topClearButton;
-  TextButton bottomClearButton;
-
-  Label numBarsLabel;
-  Label numBarsInput;
-  Label bpmLabel;
-  Label bpmInput;
-
-  ComboBox quantizationSelector;
-
   int defaultWidth = 1400;
   int defaultHeight = 700;
 

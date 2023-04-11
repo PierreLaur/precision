@@ -7,6 +7,9 @@
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
       <GROUP id="{6372F47F-085D-44C4-39EA-6E43D5F7F234}" name="UI">
+        <FILE id="pH5E6h" name="ControlPanel.cpp" compile="1" resource="0"
+              file="Source/ControlPanel.cpp"/>
+        <FILE id="nokbYZ" name="ControlPanel.h" compile="0" resource="0" file="Source/ControlPanel.h"/>
         <FILE id="f1pCaq" name="LinkableViewport.cpp" compile="1" resource="0"
               file="Source/LinkableViewport.cpp"/>
         <FILE id="Vl8Kcu" name="LinkableViewport.h" compile="0" resource="0"

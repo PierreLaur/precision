@@ -14,20 +14,20 @@
 //==============================================================================
 TransportPanel::TransportPanel()
 {
-    startTimer(60);
-    addAndMakeVisible(label);
-} 
+  startTimer(60);
+  addAndMakeVisible(label);
+}
 
 TransportPanel::~TransportPanel()
 {
 }
 
-void TransportPanel::paint (juce::Graphics& g)
+void TransportPanel::paint(juce::Graphics &g)
 {
-    g.fillAll (Colours::grey);
+  g.fillAll(Colours::grey);
 }
 
 void TransportPanel::resized()
 {
-    label.setBounds(getLocalBounds());
+  label.setBounds(getLocalBounds());
 }

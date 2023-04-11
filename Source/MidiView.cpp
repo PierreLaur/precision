@@ -13,7 +13,7 @@
 #include "MidiGrid.h"
 
 //==============================================================================
-MidiView::MidiView(PrecisionAnalytics & analytics) : analytics{analytics}
+MidiView::MidiView(PrecisionAnalytics &analytics) : analytics{analytics}
 {
 
   addAndMakeVisible(topGridView);
@@ -64,7 +64,6 @@ MidiView::MidiView(PrecisionAnalytics & analytics) : analytics{analytics}
   bottomScrollerView.setScrollBarsShown(false, false);
 
   bottomGrid.modelGrid = &topGrid;
-
 }
 
 MidiView::~MidiView()
@@ -104,12 +103,11 @@ void MidiView::automaticZoom()
   // TODO : follow the cursor
 }
 
-
-void MidiView::paint (juce::Graphics& g)
+void MidiView::paint(juce::Graphics &g)
 {
-    g.setColour (juce::Colours::black);
-    // g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-    // g.fillRect (getLocalBounds());
+  g.setColour(juce::Colours::black);
+  // g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
+  // g.fillRect (getLocalBounds());
 }
 
 void MidiView::resized()
@@ -132,7 +130,7 @@ void MidiView::resized()
   topPianoView.setBounds(
       0, topScrollerView.getBottom(),
       topPiano.getWidth(),
-      (int)(area.getHeight()*0.4-topScroller.getHeight()));
+      (int)(area.getHeight() * 0.4 - topScroller.getHeight()));
 
   topGridView.setBounds(
       topPianoView.getRight(), topScrollerView.getBottom(),
@@ -150,13 +148,13 @@ void MidiView::resized()
       area.getBottom() - bottomScrollerView.getBottom());
 
   bottomGridView.setBounds(
-      bottomPianoView.getRight(), 
+      bottomPianoView.getRight(),
       bottomScrollerView.getBottom(),
       topGridView.getWidth(),
       bottomPianoView.getHeight());
 
   minWidthMultiplier = (float)(bottomGridView.getWidth()) / bottomGrid.getWidth();
-  maxWidthMultiplier = (float)numBars*4;
+  maxWidthMultiplier = (float)numBars * 4;
   minHeightMultiplier = (float)(bottomGridView.getHeight() - bottomGridView.getHorizontalScrollBar().getHeight()) / bottomGrid.getHeight();
   maxHeightMultiplier = 10.0f;
 }

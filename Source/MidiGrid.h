@@ -57,11 +57,15 @@ public:
 
   void markNotesAsOld();
 
-  void timerCallback() override {
+  void timerCallback() override
+  {
     // Periodically updates the cursor position
-    if (relativePpqPosition == 0.0) {
+    if (relativePpqPosition == 0.0)
+    {
       setCursorAtPpqPosition(-1.0);
-    } else {
+    }
+    else
+    {
       setCursorAtPpqPosition(relativePpqPosition);
     }
   }
