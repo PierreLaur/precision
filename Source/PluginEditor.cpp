@@ -120,6 +120,19 @@ void PrecisionAudioProcessorEditor::panelUpdate(Button *button)
   {
     midiView.clearNotes(GridType::Student);
   }
+  if (button == &controlPanel.filterButton)
+  {
+    if (controlPanel.filterButton.getToggleState())
+    {
+      controlPanel.filterButton.setColour(TextButton::buttonColourId, Colours::darkmagenta);
+      controlPanel.filterButton.setButtonText("Filtering...");
+    }
+    else
+    {
+      controlPanel.filterButton.setColour(TextButton::buttonColourId, Colours::purple);
+      controlPanel.filterButton.setButtonText("Filter");
+    };
+  }
 }
 
 void PrecisionAudioProcessorEditor::startRecording(GridType grid)
@@ -154,7 +167,7 @@ void PrecisionAudioProcessorEditor::resized()
 
   midiView.setBounds(
       horizontalMargin, verticalMargin,
-      (int)((area.getWidth() - 2 * horizontalMargin) * 0.8),
+      (int)((area.getWidth() - 2 * horizontalMargin) * 0.7),
       (int)((area.getHeight() - verticalMargin * 2) * 0.98));
   midiView.scaleView();
 

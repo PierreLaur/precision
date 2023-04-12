@@ -50,6 +50,9 @@ public:
 
   ComboBox quantizationSelector;
 
+  TextButton filterButton;
+  Slider precisionSlider;
+
 private:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlPanel)
 };

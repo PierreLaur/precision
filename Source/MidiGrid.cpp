@@ -287,7 +287,7 @@ Component *MidiGrid::findModelNote(Component *note)
   // TODO: better note coupling (don't couple to the same note, add pitch & length etc.)
   for (auto const &[ID, modelGridNote] : modelGrid->notesOnGrid)
   {
-    int currentDifference = std::abs(modelGridNote->getX() - note->getX());
+    int currentDifference = std::abs(modelGridNote->getX() - note->getX()) + std::abs(modelGridNote->getY() - note->getY());
     if (currentDifference < minDifference)
     {
       modelNote = modelGridNote;

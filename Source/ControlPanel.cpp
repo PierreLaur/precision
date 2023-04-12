@@ -124,12 +124,25 @@ void ControlPanel::setupButtons()
   quantizationSelector.addItem("1/16", 16);
   quantizationSelector.addItem("1/32", 32);
 
+  addAndMakeVisible(quantizationSelector);
   quantizationSelector.setSelectedId(4);
   quantizationInBeats = 1.0f;
   quantizationSelector.onChange = [this]
   { quantizationChanged(); };
 
-  addAndMakeVisible(quantizationSelector);
+  filterButton.setColour(TextButton::buttonColourId, Colours::purple);
+  filterButton.setButtonText("Filter");
+  filterButton.addListener(this);
+  filterButton.setToggleable(true);
+  filterButton.setClickingTogglesState(true);
+  addAndMakeVisible(filterButton);
+
+  precisionSlider.setSliderStyle(Slider::Rotary);
+  precisionSlider.setTextBoxStyle(Slider::TextBoxBelow, true, 50, 15);
+  precisionSlider.setNumDecimalPlacesToDisplay(0);
+  precisionSlider.setTextValueSuffix(String(" ms"));
+  precisionSlider.setRange(0.0, 200.0);
+  addAndMakeVisible(precisionSlider);
 }
 
 void ControlPanel::buttonClicked(Button *button)
@@ -154,53 +167,65 @@ void ControlPanel::resized()
   topRecordButton.setBounds(
       horizontalMargin,
       verticalMargin,
-      80,
-      25);
+      (int)(area.getWidth() * 0.3),
+      (int)(area.getWidth() * 0.06));
   topClearButton.setBounds(
       horizontalMargin,
       topRecordButton.getBottom() + verticalMargin,
-      80,
-      25);
+      topRecordButton.getWidth(),
+      (int)(area.getWidth() * 0.06));
+
+  filterButton.setBounds(
+      (int)((area.getWidth() + topRecordButton.getRight()) / 2) - (int)(area.getWidth() * 0.15),
+      topRecordButton.getY(),
+      (int)(area.getWidth() * 0.3),
+      (int)(area.getWidth() * 0.06));
+  precisionSlider.setBounds(
+      topRecordButton.getRight() + horizontalMargin,
+      topRecordButton.getBottom(),
+      (int)(area.getWidth() * 0.7 - horizontalMargin * 2),
+      (int)(area.getHeight() * 0.5));
 
   numBarsLabel.setBounds(
       horizontalMargin,
-      topClearButton.getBottom() + verticalMargin,
-      50, 20);
+      (int)(area.getHeight() * 0.3),
+      (int)(area.getWidth() * 0.18), 20);
   numBarsInput.setBounds(
       numBarsLabel.getRight() + horizontalMargin,
       numBarsLabel.getBounds().getY(),
-      30, 20);
+      (int)(area.getWidth() * 0.12),
+      (int)(area.getHeight() * 0.06));
 
   bpmLabel.setBounds(
       horizontalMargin,
       numBarsLabel.getBottom() + verticalMargin,
-      50, 20);
+      (int)(area.getWidth() * 0.18), (int)(area.getHeight() * 0.06));
   bpmInput.setBounds(
       bpmLabel.getRight() + horizontalMargin,
       bpmLabel.getBounds().getY(),
-      30, 20);
+      (int)(area.getWidth() * 0.12), (int)(area.getHeight() * 0.06));
 
   quantizeButton.setBounds(
       horizontalMargin,
-      bpmLabel.getBottom() + verticalMargin,
-      80,
-      25);
+      bpmLabel.getBottom() + 2 * verticalMargin,
+      (int)(area.getWidth() * 0.3),
+      (int)(area.getHeight() * 0.06));
 
   quantizationSelector.setBounds(
-      quantizeButton.getRight() + horizontalMargin,
-      quantizeButton.getBounds().getY(),
-      80,
-      25);
+      horizontalMargin,
+      quantizeButton.getBounds().getBottom() + verticalMargin,
+      (int)(area.getWidth() * 0.3),
+      (int)(area.getHeight() * 0.06));
 
   bottomClearButton.setBounds(
       horizontalMargin,
-      area.getBottom() - verticalMargin - 25,
-      80,
-      25);
+      area.getBottom() - verticalMargin - (int)(area.getHeight() * 0.06),
+      (int)(area.getWidth() * 0.3),
+      (int)(area.getHeight() * 0.06));
 
   bottomRecordButton.setBounds(
       horizontalMargin,
       bottomClearButton.getY() - 25 - verticalMargin,
-      80,
-      25);
+      bottomClearButton.getWidth(),
+      (int)(area.getHeight() * 0.06));
 }
