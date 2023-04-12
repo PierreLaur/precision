@@ -58,6 +58,12 @@ void updatePlayHeadInfo(Optional<AudioPlayHead::PositionInfo> optInfo)
   }
 }
 
+double msToBeats(double ms)
+{
+  auto bps = (double)(bpm) / 60;
+  return bps * ms / 1000;
+}
+
 double samplesToSeconds(int samples, double sampleRate)
 {
   return samples / sampleRate;

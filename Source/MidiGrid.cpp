@@ -100,6 +100,18 @@ void MidiGrid::setCursorAtPpqPosition(double position)
   }
 }
 
+void MidiGrid::deleteOutsideNotes()
+{
+  for (auto const &[ID, note] : notesOnGrid)
+  {
+    if (note->getX() < 0 || note->getX() >= getWidth())
+    {
+      deleteMidiNote(ID);
+      break;
+    }
+  }
+}
+
 double getDeviation(Component *note, Component *modelNote)
 {
   int deviationPixels = note->getX() - modelNote->getX();
@@ -306,7 +318,6 @@ void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics
   auto noteRight = Point(static_cast<float>(note->getRight()), static_cast<float>(note->getBounds().getCentreY()));
   auto modelNoteRight = Point(static_cast<float>(modelNote->getRight()), static_cast<float>(modelNote->getBounds().getCentreY()));
 
-  // if (note->getX() - modelNote->getX() > 0)
   // print the correct part in green
   g.setColour(Colours::green);
   auto correctPart = note->getBounds().getIntersection(modelNote->getBounds());

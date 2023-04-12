@@ -47,7 +47,9 @@ public:
   void setNumBars()
   {
     topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+    topGrid.deleteOutsideNotes();
     bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+    bottomGrid.deleteOutsideNotes();
     topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
     bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
   }

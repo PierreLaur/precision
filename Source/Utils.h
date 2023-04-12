@@ -37,6 +37,7 @@ extern bool isRecording;
 
 void setQuantizationInBeats(float newQuantization);
 double samplesToSeconds(int samples, double sampleRate);
+double msToBeats(double ms);
 int secondsToSamples(float samples, double sampleRate);
 double samplesToBeats(int samples, double sampleRate);
 int beatsToSamples(double beats, double sampleRate);

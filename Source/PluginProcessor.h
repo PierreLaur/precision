@@ -37,6 +37,7 @@ public:
   bool isBusesLayoutSupported(const BusesLayout &layouts) const override;
 #endif
 
+  bool isPreciseEnough(MidiMessage, double);
   void processBlock(AudioBuffer<float> &, MidiBuffer &) override;
 
   //==============================================================================

@@ -127,6 +127,27 @@ bool PrecisionAudioProcessor::isBusesLayoutSupported(const BusesLayout &layouts)
 }
 #endif
 
+bool PrecisionAudioProcessor::isPreciseEnough(MidiMessage message, double messageRelativePpqPosition)
+{
+    if (message.isNoteOn())
+    {
+        auto rem = std::fmod(messageRelativePpqPosition, quantizationInBeats);
+        double ppqPrecisionLimit = msToBeats(editor->controlPanel.precisionSlider.getValue());
+        if (rem <= ppqPrecisionLimit || rem >= quantizationInBeats - ppqPrecisionLimit)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+    else
+    {
+        return true;
+    }
+}
+
 void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffer &midiMessages)
 {
     double sampleRate = getSampleRate();
@@ -180,13 +201,13 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
                 {
                     double messageRelativePpqPosition = relativePpqPosition + samplesToBeats(metadata.samplePosition, sampleRate);
                     auto message = metadata.getMessage();
-                    if (studentRecording)
-                    {
-                        editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Student);
-                    }
                     if (modelRecording)
                     {
                         editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Model);
+                    }
+                    if (studentRecording)
+                    {
+                        editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Student);
                     }
                 }
 
@@ -208,6 +229,24 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
         }
         else
             relativePpqPosition = 0;
+
+        // In filter mode, don't let through MIDI messages that are not precise enough
+        if (editor->controlPanel.filterButton.getToggleState())
+        {
+            relativePpqPosition = ppqPosition - ppqRecordingStart;
+            if (relativePpqPosition >= 0)
+            {
+                for (const auto metadata : midiMessages)
+                {
+                    double messageRelativePpqPosition = relativePpqPosition + samplesToBeats(metadata.samplePosition, sampleRate);
+                    auto message = metadata.getMessage();
+                    if (isPreciseEnough(message, messageRelativePpqPosition) == false)
+                    {
+                        midiMessages.clear(metadata.samplePosition, metadata.numBytes);
+                    }
+                }
+            }
+        }
     }
 
     // If standalone, manually update the ppqPosition

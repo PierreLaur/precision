@@ -56,6 +56,7 @@ public:
   void setCursorAtPpqPosition(double position);
 
   void markNotesAsOld();
+  void deleteOutsideNotes();
 
   void timerCallback() override
   {
