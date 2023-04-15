@@ -65,60 +65,20 @@ void PrecisionAudioProcessorEditor::paint(Graphics &g)
 
 void PrecisionAudioProcessorEditor::panelUpdate(Button *button)
 {
-  if (button == &controlPanel.quantizeButton)
-    midiView.quantizeModelGrid();
-  if (button == &controlPanel.topRecordButton)
+  if (button == &controlPanel.recordButton)
   {
-    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
-    {
-      print("Error : two grids recording at the same time");
-      stopRecording();
-      startRecording(GridType::Model);
-    }
-    else if (audioProcessor.modelRecording)
+    if (recording)
     {
       stopRecording();
-    }
-    else if (audioProcessor.studentRecording)
-    {
-      stopRecording();
-      startRecording(GridType::Model);
     }
     else
     {
-      startRecording(GridType::Model);
+      startRecording();
     }
   }
-  if (button == &controlPanel.bottomRecordButton)
+  if (button == &controlPanel.clearButton)
   {
-    if (audioProcessor.studentRecording && audioProcessor.modelRecording)
-    {
-      print("Error : two grids recording at the same time");
-      stopRecording();
-      startRecording(GridType::Student);
-    }
-    else if (audioProcessor.studentRecording)
-    {
-      stopRecording();
-    }
-    else if (audioProcessor.modelRecording)
-    {
-      stopRecording();
-      startRecording(GridType::Student);
-    }
-    else
-    {
-      startRecording(GridType::Student);
-    }
-  }
-  // TODO : update analytics on grid repaint (make it a separate component & add a reference to it in midigrid)
-  if (button == &controlPanel.topClearButton)
-  {
-    midiView.clearNotes(GridType::Model);
-  }
-  if (button == &controlPanel.bottomClearButton)
-  {
-    midiView.clearNotes(GridType::Student);
+    midiView.clearNotes();
   }
   if (button == &controlPanel.filterButton)
   {
@@ -126,36 +86,28 @@ void PrecisionAudioProcessorEditor::panelUpdate(Button *button)
     {
       controlPanel.filterButton.setColour(TextButton::buttonColourId, Colours::darkmagenta);
       controlPanel.filterButton.setButtonText("Filtering...");
+      filtering = true;
     }
     else
     {
       controlPanel.filterButton.setColour(TextButton::buttonColourId, Colours::purple);
       controlPanel.filterButton.setButtonText("Filter");
+      filtering = false;
     };
   }
 }
 
-void PrecisionAudioProcessorEditor::startRecording(GridType grid)
+void PrecisionAudioProcessorEditor::startRecording()
 {
   audioProcessor.ppqRecordingStart = ppqPositionOfLastBarStart + numPrecountBeats;
-  switch (grid)
-  {
-  case (GridType::Model):
-    audioProcessor.modelRecording = true;
-    break;
-  case (GridType::Student):
-    audioProcessor.studentRecording = true;
-    midiView.markStudentNotesAsOld();
-    break;
-  }
-  isRecording = true;
+  midiView.markNotesAsOld();
+  recording = true;
 }
 
 void PrecisionAudioProcessorEditor::stopRecording()
 {
-  audioProcessor.studentRecording = false;
-  audioProcessor.modelRecording = false;
-  isRecording = false;
+  recording = false;
+  relativePpqPosition = 0.0;
 }
 
 void PrecisionAudioProcessorEditor::resized()
@@ -181,7 +133,7 @@ void PrecisionAudioProcessorEditor::resized()
       midiView.getRight() + horizontalMargin,
       midiView.getY(),
       area.getWidth() - midiView.getRight() - horizontalMargin * 2,
-      midiView.bottomScrollerView.getY() - midiView.getY() + 2 * (25 + verticalMargin));
+      (int)(area.getHeight() / 2));
 
   precisionAnalytics.setBounds(
       midiView.getRight() + horizontalMargin,

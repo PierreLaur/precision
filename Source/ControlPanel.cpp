@@ -72,30 +72,15 @@ void ControlPanel::quantizationChanged()
 
 void ControlPanel::setupButtons()
 {
-  quantizeButton.setColour(TextButton::buttonColourId, Colours::grey);
-  quantizeButton.setButtonText("Quantize");
-  quantizeButton.addListener(this);
-  addAndMakeVisible(quantizeButton);
+  recordButton.setColour(TextButton::buttonColourId, Colours::red);
+  recordButton.setButtonText("Record");
+  recordButton.addListener(this);
+  addAndMakeVisible(recordButton);
 
-  topRecordButton.setColour(TextButton::buttonColourId, Colours::red);
-  topRecordButton.setButtonText("Record");
-  topRecordButton.addListener(this);
-  addAndMakeVisible(topRecordButton);
-
-  bottomRecordButton.setColour(TextButton::buttonColourId, Colours::red);
-  bottomRecordButton.setButtonText("Record");
-  bottomRecordButton.addListener(this);
-  addAndMakeVisible(bottomRecordButton);
-
-  topClearButton.setColour(TextButton::buttonColourId, Colours::blue);
-  topClearButton.setButtonText("Clear");
-  topClearButton.addListener(this);
-  addAndMakeVisible(topClearButton);
-
-  bottomClearButton.setColour(TextButton::buttonColourId, Colours::blue);
-  bottomClearButton.setButtonText("Clear");
-  bottomClearButton.addListener(this);
-  addAndMakeVisible(bottomClearButton);
+  clearButton.setColour(TextButton::buttonColourId, Colours::blue);
+  clearButton.setButtonText("Clear");
+  clearButton.addListener(this);
+  addAndMakeVisible(clearButton);
 
   addAndMakeVisible(numBarsLabel);
   numBarsLabel.setText("Bars : ", dontSendNotification);
@@ -119,9 +104,13 @@ void ControlPanel::setupButtons()
 
   quantizationSelector.addItem("1/1", 1);
   quantizationSelector.addItem("1/2", 2);
+  quantizationSelector.addItem("1/2 t", 3);
   quantizationSelector.addItem("1/4", 4);
+  quantizationSelector.addItem("1/4 t", 6);
   quantizationSelector.addItem("1/8", 8);
+  quantizationSelector.addItem("1/8 t", 12);
   quantizationSelector.addItem("1/16", 16);
+  quantizationSelector.addItem("1/16 t", 24);
   quantizationSelector.addItem("1/32", 32);
 
   addAndMakeVisible(quantizationSelector);
@@ -142,6 +131,8 @@ void ControlPanel::setupButtons()
   precisionSlider.setNumDecimalPlacesToDisplay(0);
   precisionSlider.setTextValueSuffix(String(" ms"));
   precisionSlider.setRange(0.0, 200.0);
+  precisionSlider.onValueChange = [this]
+  { precisionLimitMs = precisionSlider.getValue(); };
   addAndMakeVisible(precisionSlider);
 }
 
@@ -164,25 +155,25 @@ void ControlPanel::resized()
   int horizontalMargin = 10;
   int verticalMargin = 10;
 
-  topRecordButton.setBounds(
+  recordButton.setBounds(
       horizontalMargin,
       verticalMargin,
       (int)(area.getWidth() * 0.3),
       (int)(area.getWidth() * 0.06));
-  topClearButton.setBounds(
+  clearButton.setBounds(
       horizontalMargin,
-      topRecordButton.getBottom() + verticalMargin,
-      topRecordButton.getWidth(),
+      recordButton.getBottom() + verticalMargin,
+      recordButton.getWidth(),
       (int)(area.getWidth() * 0.06));
 
   filterButton.setBounds(
-      (int)((area.getWidth() + topRecordButton.getRight()) / 2) - (int)(area.getWidth() * 0.15),
-      topRecordButton.getY(),
+      (int)((area.getWidth() + recordButton.getRight()) / 2) - (int)(area.getWidth() * 0.15),
+      recordButton.getY(),
       (int)(area.getWidth() * 0.3),
       (int)(area.getWidth() * 0.06));
   precisionSlider.setBounds(
-      topRecordButton.getRight() + horizontalMargin,
-      topRecordButton.getBottom(),
+      recordButton.getRight() + horizontalMargin,
+      recordButton.getBottom(),
       (int)(area.getWidth() * 0.7 - horizontalMargin * 2),
       (int)(area.getHeight() * 0.5));
 
@@ -205,27 +196,9 @@ void ControlPanel::resized()
       bpmLabel.getBounds().getY(),
       (int)(area.getWidth() * 0.12), (int)(area.getHeight() * 0.06));
 
-  quantizeButton.setBounds(
-      horizontalMargin,
-      bpmLabel.getBottom() + 2 * verticalMargin,
-      (int)(area.getWidth() * 0.3),
-      (int)(area.getHeight() * 0.06));
-
   quantizationSelector.setBounds(
       horizontalMargin,
-      quantizeButton.getBounds().getBottom() + verticalMargin,
+      bpmInput.getBounds().getBottom() + verticalMargin,
       (int)(area.getWidth() * 0.3),
-      (int)(area.getHeight() * 0.06));
-
-  bottomClearButton.setBounds(
-      horizontalMargin,
-      area.getBottom() - verticalMargin - (int)(area.getHeight() * 0.06),
-      (int)(area.getWidth() * 0.3),
-      (int)(area.getHeight() * 0.06));
-
-  bottomRecordButton.setBounds(
-      horizontalMargin,
-      bottomClearButton.getY() - 25 - verticalMargin,
-      bottomClearButton.getWidth(),
       (int)(area.getHeight() * 0.06));
 }

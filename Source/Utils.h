@@ -33,14 +33,20 @@ extern int numPrecountBeats;
 extern int numBars;
 extern float quantizationInBeats;
 
-extern bool isRecording;
+extern bool recording;
+extern bool filtering;
+extern double precisionLimitMs;
+
+class MidiNote;
 
 void setQuantizationInBeats(float newQuantization);
 double samplesToSeconds(int samples, double sampleRate);
 double msToBeats(double ms);
+double beatsToMs(double beats);
 int secondsToSamples(float samples, double sampleRate);
 double samplesToBeats(int samples, double sampleRate);
 int beatsToSamples(double beats, double sampleRate);
+double getPpqDeviation(MidiNote *note);
 String noteNumberToName(int noteNumber);
 void updatePlayHeadInfo(Optional<AudioPlayHead::PositionInfo> info);
 template <typename T>

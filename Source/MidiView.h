@@ -31,43 +31,32 @@ public:
   void paint(Graphics &) override;
   void resized() override;
 
-  void clearNotes(GridType grid)
+  void clearNotes()
   {
-    if (grid == GridType::Student)
-      bottomGrid.clearNotes();
-    if (grid == GridType::Model)
-      topGrid.clearNotes();
-  }
-
-  void quantizeModelGrid()
-  {
-    topGrid.quantize();
+    grid.clearNotes();
   }
 
   void setNumBars()
   {
-    topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-    topGrid.deleteOutsideNotes();
-    bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-    bottomGrid.deleteOutsideNotes();
-    topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
-    bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+    grid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+    grid.deleteOutsideNotes();
+    scroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 50);
+    setMinMaxMultipliers();
   }
 
   void scaleView()
   {
-    topPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
-    topGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-    bottomPiano.setTransform(scaler.scale(1.0f, heightMultiplier));
-    bottomGrid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
-    topScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
-    bottomScroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
+    piano.setTransform(scaler.scale(1.0f, heightMultiplier));
+    grid.setTransform(scaler.scale(widthMultiplier, heightMultiplier));
+    scroller.setTransform(scaler.scale(widthMultiplier, 1.0f));
   }
 
-  void markStudentNotesAsOld()
+  void markNotesAsOld()
   {
-    bottomGrid.markNotesAsOld();
+    grid.markNotesAsOld();
   }
+
+  void setMinMaxMultipliers();
 
   void verticalZoom(const MouseWheelDetails wheel);
   void horizontalZoom(const MouseWheelDetails wheel);
@@ -75,20 +64,13 @@ public:
 
   PrecisionAnalytics &analytics;
 
-  VerticalPiano topPiano;
-  VerticalPiano bottomPiano;
-  MidiGrid topGrid = MidiGrid{GridType::Model, analytics};
-  MidiGrid bottomGrid = MidiGrid{GridType::Student, analytics};
-  BeatScroller topScroller;
-  BeatScroller bottomScroller;
+  VerticalPiano piano;
+  MidiGrid grid = MidiGrid{analytics};
+  BeatScroller scroller;
 
-  LinkableViewport topGridView = LinkableViewport(*this);
-  LinkableViewport topPianoView = LinkableViewport(*this);
-  LinkableViewport topScrollerView = LinkableViewport(*this);
-
-  LinkableViewport bottomGridView = LinkableViewport(*this);
-  LinkableViewport bottomPianoView = LinkableViewport(*this);
-  LinkableViewport bottomScrollerView = LinkableViewport(*this);
+  LinkableViewport gridView = LinkableViewport(*this);
+  LinkableViewport pianoView = LinkableViewport(*this);
+  LinkableViewport scrollerView = LinkableViewport(*this);
 
   AffineTransform scaler = AffineTransform::AffineTransform();
   float widthMultiplier = 1.0f;

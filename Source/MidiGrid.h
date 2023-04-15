@@ -21,16 +21,10 @@
 using namespace juce;
 class MidiNote;
 
-enum class GridType
-{
-  Student,
-  Model
-};
-
 class MidiGrid : public Component, Timer
 {
 public:
-  MidiGrid(GridType type, PrecisionAnalytics &analytics);
+  MidiGrid(PrecisionAnalytics &analytics);
   ~MidiGrid() override;
   void paint(juce::Graphics &) override;
   void paintOverChildren(juce::Graphics &) override;
@@ -49,9 +43,7 @@ public:
   void deleteMidiNote(String noteID);
   void clearNotes();
 
-  void quantize();
-  Component *findModelNote(Component *noteID);
-  void drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g);
+  void drawNoteAnalytics(Component *note, double deviation, Graphics &g);
 
   void setCursorAtPpqPosition(double position);
 
@@ -61,13 +53,13 @@ public:
   void timerCallback() override
   {
     // Periodically updates the cursor position
-    if (relativePpqPosition == 0.0)
+    if (recording)
     {
-      setCursorAtPpqPosition(-1.0);
+      setCursorAtPpqPosition(relativePpqPosition);
     }
     else
     {
-      setCursorAtPpqPosition(relativePpqPosition);
+      setCursorAtPpqPosition(-1.0);
     }
   }
 
@@ -77,12 +69,7 @@ public:
   std::map<String, MidiNote *> notesOnGrid;
   std::map<String, MidiNote *> oldNotes;
 
-  GridType gridType;
-  MidiGrid *modelGrid = nullptr;
-
-  bool analyzeNoteLengths = false;
   PrecisionAnalytics &analytics;
-
   PlaybackCursor cursor;
 
 private:

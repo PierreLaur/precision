@@ -37,11 +37,8 @@ public:
 
   std::function<void(Button *)> onUpdate;
 
-  TextButton quantizeButton;
-  TextButton topRecordButton;
-  TextButton bottomRecordButton;
-  TextButton topClearButton;
-  TextButton bottomClearButton;
+  TextButton recordButton;
+  TextButton clearButton;
 
   Label numBarsLabel;
   Label numBarsInput;

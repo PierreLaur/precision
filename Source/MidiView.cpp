@@ -16,54 +16,29 @@
 MidiView::MidiView(PrecisionAnalytics &analytics) : analytics{analytics}
 {
 
-  addAndMakeVisible(topGridView);
-  addAndMakeVisible(bottomGridView);
-  addAndMakeVisible(topPianoView);
+  addAndMakeVisible(gridView);
+  addAndMakeVisible(pianoView);
+  addAndMakeVisible(scrollerView);
 
-  addAndMakeVisible(bottomPianoView);
-  addAndMakeVisible(topScrollerView);
-  addAndMakeVisible(bottomScrollerView);
-
-  // Synchronize scrolling on both viewports
-  topGridView.linkViewport(&topPianoView);
-  topGridView.linkViewport(&bottomPianoView);
-  topGridView.linkViewport(&bottomGridView);
-  topGridView.linkViewport(&topScrollerView);
-  topGridView.linkViewport(&bottomScrollerView);
-  bottomGridView.linkViewport(&topPianoView);
-  bottomGridView.linkViewport(&bottomPianoView);
-  bottomGridView.linkViewport(&topGridView);
-  bottomGridView.linkViewport(&topScrollerView);
-  bottomGridView.linkViewport(&bottomScrollerView);
+  // Synchronize scrolling on the viewports
+  gridView.linkViewport(&pianoView);
+  gridView.linkViewport(&scrollerView);
 
   // Set viewed components
-  topGridView.setViewedComponent(&topGrid, false);
-  bottomGridView.setViewedComponent(&bottomGrid, false);
-  topScrollerView.setViewedComponent(&topScroller, false);
-  bottomScrollerView.setViewedComponent(&bottomScroller, false);
-  topPianoView.setViewedComponent(&topPiano, false);
-  bottomPianoView.setViewedComponent(&bottomPiano, false);
+  gridView.setViewedComponent(&grid, false);
+  scrollerView.setViewedComponent(&scroller, false);
+  pianoView.setViewedComponent(&piano, false);
 
-  // centers of the grids
-  topGridView.setViewPosition(Point(0, topGrid.getHeight() / 2));
-  bottomGridView.setViewPosition(Point(0, bottomGrid.getHeight() / 2));
+  // set the view in the center of the grid
+  gridView.setViewPosition(Point(0, grid.getHeight() / 2));
 
   // Hide the vertical scrollbar, show the horizontal one
-  topGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
-  topGridView.setScrollBarsShown(false, true, true);
-  bottomGridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
-  bottomGridView.setScrollBarsShown(false, true, true);
-
-  topPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  topPianoView.setScrollBarsShown(false, false);
-  bottomPianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  bottomPianoView.setScrollBarsShown(false, false);
-  topScrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  topScrollerView.setScrollBarsShown(false, false);
-  bottomScrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
-  bottomScrollerView.setScrollBarsShown(false, false);
-
-  bottomGrid.modelGrid = &topGrid;
+  gridView.setScrollOnDragMode(Viewport::ScrollOnDragMode::all);
+  gridView.setScrollBarsShown(false, true, true);
+  pianoView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
+  pianoView.setScrollBarsShown(false, false);
+  scrollerView.setScrollOnDragMode(Viewport::ScrollOnDragMode::never);
+  scrollerView.setScrollBarsShown(false, false);
 }
 
 MidiView::~MidiView()
@@ -110,51 +85,38 @@ void MidiView::paint(juce::Graphics &g)
   // g.fillRect (getLocalBounds());
 }
 
+void MidiView::setMinMaxMultipliers()
+{
+  minWidthMultiplier = (float)(gridView.getWidth()) / grid.getWidth();
+  maxWidthMultiplier = (float)numBars * 4;
+  minHeightMultiplier = (float)(gridView.getHeight() - gridView.getHorizontalScrollBar().getHeight()) / grid.getHeight();
+  maxHeightMultiplier = 10.0f;
+}
+
 void MidiView::resized()
 {
 
   auto area = getLocalBounds();
 
-  topGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-  bottomGrid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
-  topScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 30);
-  bottomScroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 30);
-  topPiano.setSize(30, NOTE_HEIGHT * 128);
-  bottomPiano.setSize(30, NOTE_HEIGHT * 128);
+  grid.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 128 * NOTE_HEIGHT);
+  scroller.setSize(BEAT_LENGTH_PIXELS * numBars * timeSigNumerator, 30);
+  piano.setSize(30, NOTE_HEIGHT * 128);
 
-  topScrollerView.setBounds(
-      topPiano.getWidth(), 0,
-      area.getWidth() - topPiano.getWidth(),
-      topScroller.getHeight());
+  scrollerView.setBounds(
+      piano.getWidth(), 0,
+      area.getWidth() - piano.getWidth(),
+      scroller.getHeight());
 
-  topPianoView.setBounds(
-      0, topScrollerView.getBottom(),
-      topPiano.getWidth(),
-      (int)(area.getHeight() * 0.4 - topScroller.getHeight()));
+  pianoView.setBounds(
+      0, scrollerView.getBottom(),
+      piano.getWidth(),
+      area.getHeight() - scroller.getHeight());
 
-  topGridView.setBounds(
-      topPianoView.getRight(), topScrollerView.getBottom(),
-      topScrollerView.getWidth(),
-      topPianoView.getHeight());
+  gridView.setBounds(
+      pianoView.getRight(),
+      scrollerView.getBottom(),
+      scrollerView.getWidth(),
+      pianoView.getHeight());
 
-  bottomScrollerView.setBounds(
-      topPiano.getWidth(), topPianoView.getBottom(),
-      topScrollerView.getWidth(),
-      topScrollerView.getHeight());
-
-  bottomPianoView.setBounds(
-      0, bottomScrollerView.getBottom(),
-      topPianoView.getWidth(),
-      area.getBottom() - bottomScrollerView.getBottom());
-
-  bottomGridView.setBounds(
-      bottomPianoView.getRight(),
-      bottomScrollerView.getBottom(),
-      topGridView.getWidth(),
-      bottomPianoView.getHeight());
-
-  minWidthMultiplier = (float)(bottomGridView.getWidth()) / bottomGrid.getWidth();
-  maxWidthMultiplier = (float)numBars * 4;
-  minHeightMultiplier = (float)(bottomGridView.getHeight() - bottomGridView.getHorizontalScrollBar().getHeight()) / bottomGrid.getHeight();
-  maxHeightMultiplier = 10.0f;
+  setMinMaxMultipliers();
 }

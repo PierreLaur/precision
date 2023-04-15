@@ -10,6 +10,7 @@
 
 #include <JuceHeader.h>
 #include "Utils.h"
+#include "MidiNote.h"
 using namespace juce;
 
 // PlayHead information from host
@@ -28,7 +29,9 @@ int numPrecountBeats = 0;
 int numBars = 8;
 float quantizationInBeats = 1.0;
 
-bool isRecording = false;
+bool recording = false;
+bool filtering = false;
+double precisionLimitMs = 0.0;
 
 void updatePlayHeadInfo(Optional<AudioPlayHead::PositionInfo> optInfo)
 {
@@ -42,6 +45,7 @@ void updatePlayHeadInfo(Optional<AudioPlayHead::PositionInfo> optInfo)
   {
     isStandalone = false;
     bpm = *info.getBpm();
+    // TODO : update bpm
 
     auto timeSig = *info.getTimeSignature();
     timeSigNumerator = timeSig.numerator;
@@ -62,6 +66,12 @@ double msToBeats(double ms)
 {
   auto bps = (double)(bpm) / 60;
   return bps * ms / 1000;
+}
+
+double beatsToMs(double beats)
+{
+  auto bps = (double)(bpm) / 60;
+  return beats / bps * 1000;
 }
 
 double samplesToSeconds(int samples, double sampleRate)
@@ -102,6 +112,19 @@ MidiFile readMidiFile(String address)
   MidiFile midiClip = MidiFile::MidiFile();
   midiClip.readFrom(myStream);
   return midiClip;
+}
+
+double getPpqDeviation(MidiNote *note)
+{
+  auto rem = std::fmod(note->noteStart, quantizationInBeats);
+  if (rem < quantizationInBeats / 2)
+  {
+    return rem;
+  }
+  else
+  {
+    return rem - quantizationInBeats;
+  }
 }
 
 String noteNumberToName(int noteNumber)

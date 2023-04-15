@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="VKDacJ" name="precision_v0" projectType="audioplug" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              pluginFormats="buildStandalone,buildVST3" pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
-              pluginVST3Category="Analyzer,Tools" pluginName="Precision" pluginManufacturer="PierreLaur">
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" pluginFormats="buildStandalone,buildVST,buildVST3"
+              pluginCharacteristicsValue="pluginIsSynth,pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginVST3Category="Analyzer,Tools" pluginName="Precision" pluginManufacturer="PierreLaur"
+              pluginVSTCategory="kPlugCategAnalysis" displaySplashScreen="1">
   <MAINGROUP id="AOMiAs" name="precision_v0">
     <GROUP id="{A7980E91-D9FC-AF27-212E-D03769014CAF}" name="Source">
       <GROUP id="{6372F47F-085D-44C4-39EA-6E43D5F7F234}" name="UI">

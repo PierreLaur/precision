@@ -29,19 +29,12 @@ public:
   void resized() override;
   void panelUpdate(Button *button);
 
-  void startRecording(GridType grid);
+  void startRecording();
   void stopRecording();
 
-  void processMidiMessage(MidiMessage *message, double position, double maxPpqPosition, GridType grid)
+  void processMidiMessage(MidiMessage *message, double position, double maxPpqPosition)
   {
-    if (grid == GridType::Student)
-    {
-      midiView.bottomGrid.processMidiMessage(message, position, maxPpqPosition);
-    }
-    else
-    {
-      midiView.topGrid.processMidiMessage(message, position, maxPpqPosition);
-    }
+    midiView.grid.processMidiMessage(message, position, maxPpqPosition);
   }
 
   PrecisionAnalytics precisionAnalytics;

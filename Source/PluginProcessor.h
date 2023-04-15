@@ -64,9 +64,6 @@ public:
   void getStateInformation(MemoryBlock &destData) override;
   void setStateInformation(const void *data, int sizeInBytes) override;
 
-  bool studentRecording = false;
-  bool modelRecording = false;
-
   double ppqRecordingStart = 0.0;
   Metronome metronome;
 

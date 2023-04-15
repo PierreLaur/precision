@@ -16,7 +16,7 @@
 #include <map>
 
 //==============================================================================
-MidiGrid::MidiGrid(GridType type, PrecisionAnalytics &analytics) : gridType{type}, analytics{analytics}
+MidiGrid::MidiGrid(PrecisionAnalytics &analytics) : analytics{analytics}
 {
   // TODO: check if this is useful
   setLookAndFeel(&lf);
@@ -43,8 +43,8 @@ void MidiGrid::paint(Graphics &g)
   for (int i = 0; i < 128; i++)
   {
     // this has to be drawn longer, otherwise it doesn't go all the way
-    Rectangle rect = Rectangle(Point<float>(0.0f, static_cast<float>(i * NOTE_HEIGHT)),
-                               Point<float>(static_cast<float>(getRight()) * 10.0f, (static_cast<float>(i) + 1.0f) * static_cast<float>(NOTE_HEIGHT)));
+    Rectangle rect = Rectangle(Point<float>(0.0f, (float)(i * NOTE_HEIGHT)),
+                               Point<float>((float)(getRight()) * 10.0f, ((float)(i) + 1.0f) * (float)(NOTE_HEIGHT)));
 
     if (i % 12 == 1 || i % 12 == 4 || i % 12 == 6 || i % 12 == 9 || i % 12 == 11)
     {
@@ -61,18 +61,18 @@ void MidiGrid::paint(Graphics &g)
       g.setColour(Colours::dimgrey);
     // this has to be drawn longer, otherwise it doesn't go all the way
     g.drawLine(Line(
-                   Point(static_cast<float>(i), 0.0f),
-                   Point(static_cast<float>(i), static_cast<float>(getHeight() * 15))),
+                   Point((float)(i), 0.0f),
+                   Point((float)(i), (float)(getHeight() * 15))),
                0.5f);
   }
 
   // outline around the grid
   g.setColour(Colours::black);
   auto bounds = getLocalBounds();
-  auto topleft = Point(static_cast<float>(bounds.getX()), static_cast<float>(bounds.getY()));
-  auto topright = Point(static_cast<float>(bounds.getRight()), static_cast<float>(bounds.getY()));
-  auto bottomleft = Point(static_cast<float>(bounds.getX()), static_cast<float>(bounds.getBottom()));
-  auto bottomright = Point(static_cast<float>(bounds.getRight()), static_cast<float>(bounds.getBottom()));
+  auto topleft = Point((float)(bounds.getX()), (float)(bounds.getY()));
+  auto topright = Point((float)(bounds.getRight()), (float)(bounds.getY()));
+  auto bottomleft = Point((float)(bounds.getX()), (float)(bounds.getBottom()));
+  auto bottomright = Point((float)(bounds.getRight()), (float)(bounds.getBottom()));
 
   g.drawLine(Line(topleft, topright), 3.0f);
   g.drawLine(Line(topright, bottomright), 3.0f);
@@ -112,14 +112,6 @@ void MidiGrid::deleteOutsideNotes()
   }
 }
 
-double getDeviation(Component *note, Component *modelNote)
-{
-  int deviationPixels = note->getX() - modelNote->getX();
-  double deviationBeats = (double)deviationPixels / BEAT_LENGTH_PIXELS;
-  double deviationMs = 1000.0 * 60.0 * deviationBeats / (double)bpm;
-  return deviationMs;
-}
-
 void MidiGrid::updateAnalytics(double newAverageAbsoluteDeviationMs, double newAverageDeviationMs,
                                double newAverageAbsoluteDeviationToLengthMs, double newAverageDeviationToLengthMs)
 {
@@ -128,32 +120,22 @@ void MidiGrid::updateAnalytics(double newAverageAbsoluteDeviationMs, double newA
 
 void MidiGrid::paintOverChildren(Graphics &g)
 {
-  if (gridType == GridType::Student)
+  double newAverageAbsoluteDeviationMs = 0.0;
+  double newAverageDeviationMs = 0.0;
+  [[maybe_unused]] double newAverageAbsoluteDeviationToLengthMs = 0.0;
+  [[maybe_unused]] double newAverageDeviationToLengthMs = 0.0;
+
+  for (auto const &[ID, note] : notesOnGrid)
   {
-    double newAverageAbsoluteDeviationMs = 0.0;
-    double newAverageDeviationMs = 0.0;
-    [[maybe_unused]] double newAverageAbsoluteDeviationToLengthMs = 0.0;
-    [[maybe_unused]] double newAverageDeviationToLengthMs = 0.0;
-
-    for (auto const &[ID, note] : notesOnGrid)
-    {
-      auto modelNote = findModelNote(note);
-
-      if (modelNote != nullptr)
-      {
-        g.setColour(Colours::purple);
-        g.setOpacity(0.2f);
-        g.fillRect(modelNote->getBounds());
-        drawNoteAnalytics(note, modelNote, g);
-        double deviation = getDeviation(note, modelNote);
-        newAverageDeviationMs += deviation;
-        newAverageAbsoluteDeviationMs += abs(deviation);
-      }
-    }
-    repaint(getLocalBounds());
-
-    updateAnalytics(newAverageAbsoluteDeviationMs / notesOnGrid.size(), newAverageDeviationMs / notesOnGrid.size(), 0.0, 0.0);
+    double ppqDeviation = getPpqDeviation(note);
+    drawNoteAnalytics(note, ppqDeviation, g);
+    double deviationMs = beatsToMs(ppqDeviation);
+    newAverageDeviationMs += deviationMs;
+    newAverageAbsoluteDeviationMs += abs(deviationMs);
   }
+
+  repaint(getLocalBounds());
+  updateAnalytics(newAverageAbsoluteDeviationMs / notesOnGrid.size(), newAverageDeviationMs / notesOnGrid.size(), 0.0, 0.0);
 }
 
 void MidiGrid::resized()
@@ -273,69 +255,43 @@ void MidiGrid::mouseDoubleClick(const MouseEvent &e)
   createMidiNote(e.getPosition());
 }
 
-void MidiGrid::quantize()
+void MidiGrid::drawNoteAnalytics(Component *note, double ppqDeviation, Graphics &g)
 {
 
-  for (auto const &[ID, note] : notesOnGrid)
+  auto noteLeft = Point((float)(note->getX()), (float)(note->getBounds().getCentreY()));
+  auto noteRight = Point((float)(note->getRight()), (float)(note->getBounds().getCentreY()));
+  auto precisionLimitPpq = msToBeats(precisionLimitMs);
+
+  // note outline
+  g.setColour(Colours::black);
+  g.drawRect(note->getBounds());
+
+  if (std::abs(ppqDeviation) > precisionLimitPpq)
   {
-    float currentStart = (float)(note->getX()) / BEAT_LENGTH_PIXELS;
-    float currentLength = (float)(note->getWidth()) / BEAT_LENGTH_PIXELS;
+    // print the note in red
+    g.setColour(Colours::red);
+    g.fillRect(note->getBounds());
 
-    Rectangle<int> newBounds = note->getBounds();
-    newBounds.setX(
-        static_cast<int>(std::round(currentStart / quantizationInBeats) * quantizationInBeats * BEAT_LENGTH_PIXELS));
-    auto quantizedLength = std::round(currentLength / quantizationInBeats) * quantizationInBeats;
-    newBounds.setWidth((int)(std::max(quantizedLength, quantizationInBeats) * BEAT_LENGTH_PIXELS));
-    note->setBounds(newBounds);
-  }
-}
-
-// finds the closest note to this one in the model grid
-Component *MidiGrid::findModelNote(Component *note)
-{
-  Component *modelNote = nullptr;
-  int minDifference = INT_MAX;
-
-  // TODO: better note coupling (don't couple to the same note, add pitch & length etc.)
-  for (auto const &[ID, modelGridNote] : modelGrid->notesOnGrid)
-  {
-    int currentDifference = std::abs(modelGridNote->getX() - note->getX()) + std::abs(modelGridNote->getY() - note->getY());
-    if (currentDifference < minDifference)
+    if (ppqDeviation >= 0.0)
     {
-      modelNote = modelGridNote;
-      minDifference = currentDifference;
+      auto correctPosition = Point((float)(note->getX() - (ppqDeviation - precisionLimitPpq) * BEAT_LENGTH_PIXELS), (float)(note->getBounds().getCentreY()));
+      g.drawArrow(Line(noteLeft, correctPosition), 4.0f, 9.0f, 9.0f);
+      g.setColour(Colours::darkred);
+      g.drawArrow(Line(noteLeft, correctPosition), 3.0f, 8.0f, 8.0f);
+    }
+    else
+    {
+      auto correctPosition = Point((float)(note->getX() - (ppqDeviation + precisionLimitPpq) * BEAT_LENGTH_PIXELS), (float)(note->getBounds().getCentreY()));
+      g.setColour(Colours::darkred);
+      auto missedBounds = Rectangle(note->getX(), note->getY(), (int)(correctPosition.getX() - note->getX()), note->getHeight());
+      g.fillRect(missedBounds);
     }
   }
-
-  return modelNote;
-}
-
-void MidiGrid::drawNoteAnalytics(Component *note, Component *modelNote, Graphics &g)
-{
-
-  auto noteLeft = Point(static_cast<float>(note->getX()), static_cast<float>(note->getBounds().getCentreY()));
-  auto modelNoteLeft = Point(static_cast<float>(modelNote->getX()), static_cast<float>(modelNote->getBounds().getCentreY()));
-  auto noteRight = Point(static_cast<float>(note->getRight()), static_cast<float>(note->getBounds().getCentreY()));
-  auto modelNoteRight = Point(static_cast<float>(modelNote->getRight()), static_cast<float>(modelNote->getBounds().getCentreY()));
-
-  // print the correct part in green
-  g.setColour(Colours::green);
-  auto correctPart = note->getBounds().getIntersection(modelNote->getBounds());
-  g.fillRect(correctPart);
-
-  // outline and arrow
-  g.setColour(Colours::black);
-  g.drawRect(correctPart);
-  g.drawArrow(Line(noteLeft, modelNoteLeft), 4.0f, 9.0f, 9.0f);
-
-  g.setColour(Colours::darkred);
-  g.drawArrow(Line(noteLeft, modelNoteLeft), 3.0f, 8.0f, 8.0f);
-
-  if (analyzeNoteLengths)
+  else
   {
-    g.setColour(Colours::darkblue);
-    g.setOpacity(0.4f);
-    g.drawArrow(Line(noteRight, modelNoteRight), 1.5f, 5.0f, 5.0f);
+    // print the note in green
+    g.setColour(Colours::green);
+    g.fillRect(note->getBounds());
   }
 }
 

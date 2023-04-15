@@ -132,7 +132,7 @@ bool PrecisionAudioProcessor::isPreciseEnough(MidiMessage message, double messag
     if (message.isNoteOn())
     {
         auto rem = std::fmod(messageRelativePpqPosition, quantizationInBeats);
-        double ppqPrecisionLimit = msToBeats(editor->controlPanel.precisionSlider.getValue());
+        double ppqPrecisionLimit = msToBeats(precisionLimitMs);
         if (rem <= ppqPrecisionLimit || rem >= quantizationInBeats - ppqPrecisionLimit)
         {
             return true;
@@ -177,61 +177,35 @@ void PrecisionAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffe
         // the samples and the outer loop is handling the channels.
         // Alternatively, you can process the samples with the channels
         // interleaved by keeping the same state.
-
-        // if (studentRecording || modelRecording)
-        // {
-        // int n = metronome.count(buffer, totalNumOutputChannels, blockStartTimesteps, numSamples, sampleRate);
-        // if (n != 0)
-        // {
-        //     std::cout << "Clicked at" << samplesToBeats(blockStartTimesteps + n, sampleRate) << std::endl;
-        // }
-        // }
     }
 
     // MIDI
     {
 
-        if (studentRecording || modelRecording)
+        if (recording)
         {
             double maxRelativePpqPosition = numBars * timeSigNumerator;
             relativePpqPosition = ppqPosition - ppqRecordingStart;
-            if (relativePpqPosition >= 0)
+            if (relativePpqPosition >= 0.0)
             {
                 for (const auto metadata : midiMessages)
                 {
                     double messageRelativePpqPosition = relativePpqPosition + samplesToBeats(metadata.samplePosition, sampleRate);
                     auto message = metadata.getMessage();
-                    if (modelRecording)
-                    {
-                        editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Model);
-                    }
-                    if (studentRecording)
-                    {
-                        editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition, GridType::Student);
-                    }
+                    editor->processMidiMessage(&message, messageRelativePpqPosition, maxRelativePpqPosition);
                 }
 
-                // end of the recording zone
+                // end of the recording zone, loop
                 if (relativePpqPosition > maxRelativePpqPosition)
                 {
-                    if (studentRecording)
-                    {
-                        editor->stopRecording();
-                        // LOOP
-                        editor->startRecording(GridType::Student);
-                    }
-                    else
-                    {
-                        editor->stopRecording();
-                    }
+                    editor->stopRecording();
+                    editor->startRecording();
                 }
             }
         }
-        else
-            relativePpqPosition = 0;
 
         // In filter mode, don't let through MIDI messages that are not precise enough
-        if (editor->controlPanel.filterButton.getToggleState())
+        if (filtering)
         {
             relativePpqPosition = ppqPosition - ppqRecordingStart;
             if (relativePpqPosition >= 0)
